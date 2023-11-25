@@ -1,0 +1,28 @@
+### Instruction:
+
+From supplied description, generate a JSON list of available exits to other
+locations. For each specific destination, include exit name and one-sentence
+description of the destination in the following schema:
+
+```json-schema
+{
+    "id1": {
+        "name": "Exit name one",
+        "description": "Description of destination one"
+    },
+    "id2": {
+        "name": "Exit name two",
+        "description": "Description of destination two"
+    }
+}
+```
+
+Description: {{description}}
+
+### Response: 
+
+Available exits:
+
+```json
+{
+	"

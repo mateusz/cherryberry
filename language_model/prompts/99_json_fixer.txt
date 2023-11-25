@@ -1,0 +1,11 @@
+### Instruction:
+
+Generate valid JSON from the following malformed JSON:
+
+```json-malformed
+{{json}}
+```
+
+### Response: 
+
+```json

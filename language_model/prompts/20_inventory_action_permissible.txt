@@ -1,0 +1,19 @@
+### Instruction:
+
+Taking into account the supplied JSON inventory of the character, decide if the provided action is permissible.
+
+Inventory:
+
+{
+  "inventory": [
+    "water"
+  ]
+}
+
+Description: You are in a clearing, with a forest surrounding you on the west and south.
+There is a pile of leaves on the ground.
+
+Action: I rake the leaves into a tidy pile
+
+### Response: 
+

@@ -1,0 +1,34 @@
+### Instruction:
+
+From supplied JSON curren inventory of the character, generate an updated inventory based on the description and the action provided.
+Take permissibility into account. For the response, use the following format:
+
+```json-template
+[
+    "<item1>",
+    "<item2>",
+    "<item3>"
+]
+```
+
+Current inventory:
+
+```json
+[
+  "water"
+]
+```
+
+Description: You are in a clearing, with a forest surrounding you on the west and south.
+There is a pile of leaves on the ground.
+
+Permissibility:  The action 'I rake the leaves into a tidy pile' does not make sense for the character based on their inventory. The character has water, but no rake.
+
+Action: You attempt to gather the leaves in your hands, but they keep slipping out and spreading around you. Eventually, you manage to form a somewhat tidy pile of leaves with what little control you have over them.
+
+### Response: 
+
+JSON updated inventory: 
+
+```json
+[

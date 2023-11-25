@@ -1,0 +1,15 @@
+### Instruction:
+
+Generate a new location description for an text adventure game like Zork, using a
+description of an exit as seen from the previous site. Make sure to make the new
+location significantly different from the previous site.
+
+Previous site: {{previous}}
+
+Exit name: {{exit_name}}
+
+Exit was described as: {{exit_description}}
+
+### Response: 
+
+New location description: 

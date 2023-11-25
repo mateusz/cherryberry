@@ -1,0 +1,9 @@
+### Instruction:
+
+From supplied requirements, generate a location description for an text adventure game like Zork.
+Include a few nouns the player can interact with, and a few possible exits.
+
+Requirements: {{requirements}}
+
+### Response: 
+
