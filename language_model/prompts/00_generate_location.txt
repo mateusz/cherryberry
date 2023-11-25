@@ -1,9 +1,9 @@
 ### Instruction:
 
-From supplied requirements, generate a location description for an text adventure game like Zork.
-Include a few nouns the player can interact with, and a few possible exits.
+From supplied requirements, generate a location description for an text adventure game like Zork. Include a few things the player can interact with, and a few possible exits. Do not use word "you", write in the third person perspective and avoid adjectives.
 
 Requirements: {{requirements}}
 
 ### Response: 
 
+One paragraph description: 

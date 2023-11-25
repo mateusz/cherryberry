@@ -1,4 +1,4 @@
-name: helloadventurer
+name: cherryberry
 channels:
   - conda-forge
 dependencies:

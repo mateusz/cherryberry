@@ -48,6 +48,9 @@ def game_loop(starter_data=None, from_save=None):
             elif e.__class__.__name__=='ActivateModule':
                 current_module = all_modules[e.id]
                 current_module.on_activate()
+            elif e.__class__.__name__=='DeleteModule':
+                del all_modules[e.id]
+                os.remove(f"save/modules/{e.id}.json")
 
         
 

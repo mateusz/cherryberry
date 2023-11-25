@@ -1,8 +1,6 @@
 ### Instruction:
 
-From supplied description, generate a JSON list of available exits to other
-locations. For each specific destination, include exit name and one-sentence
-description of the destination in the following schema:
+From supplied description, generate a JSON list of available exits to other locations. For each specific destination, include exit name and one-sentence description of the destination in the following schema:
 
 ```json-schema
 {

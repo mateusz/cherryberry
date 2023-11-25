@@ -1,8 +1,9 @@
 from enum import Enum
 import json
 import hashlib
-from events import AddModule, ActivateModule
-
+from events import AddModule, ActivateModule, DeleteModule
+import shlex
+import re
     
 class Location_States(Enum):
     START = 1
@@ -16,8 +17,8 @@ class Location():
         try:
             exits = llm.find_exits(description)
         except Exception as exc:
-            print(exc)
-            print("[Failed. Redo the action to try again]")
+            print("[No exits found, but you can use the ENTER command]")
+            exits = {}
 
         return Location(llm, {
             "name": name,
@@ -27,18 +28,18 @@ class Location():
         })
 
     @staticmethod
-    def create_from_exit(name, llm, previous, exit):
+    def create_from_exit(llm, previous, exit):
         print("[Generating location description from exit]")
         description = llm.generate_location_from_exit(previous, exit.get('name'), exit.get('description'))
         print("[Looking for exits...]")
         try:
             exits = llm.find_exits(description)
         except Exception as exc:
-            print(exc)
-            print("[Failed. Redo the action to try again]")
+            print("[No exits found, but you can use the ENTER command]")
+            exits = {}
 
         return Location(llm, {
-            "name": name,
+            "name": exit.get('name'),
             "state": Location_States.START,
             "description": description,
             "exits": exits,
@@ -56,10 +57,12 @@ class Location():
         self.id = hashlib.md5(self.description.encode('utf-8')).hexdigest()
 
     def on_input(self, line):
-        if line=='look' or line=='l':
+        cmd = shlex.split(line)
+
+        if cmd[0]=='look' or cmd[0]=='l':
             self.describe()
-        if line.startswith('go'):
-            exit_number = int(line.split(" ")[1]) - 1
+        elif cmd[0]=='go' or cmd[0]=='g':
+            exit_number = int(cmd[1]) - 1
             key = list(self.exits.keys())[exit_number]
             ex = list(self.exits.values())[exit_number]
             print(f"Taking the exit '{ex.get('name')}'")
@@ -69,21 +72,60 @@ class Location():
                     ActivateModule(ex.get('id')),
                 ]
             else:
-                try:
-                    l = Location.create_from_exit(ex.get('name'), self.llm, self.description, ex)
-                    l.exits["<<back>>"] = {
-                        "name": self.name,
-                        "id": self.id,
-                    }
-                    self.exits[key]["id"] = l.id
+                l = Location.create_from_exit(self.llm, self.description, ex)
+                l.exits["<<back>>"] = {
+                    "name": self.name,
+                    "id": self.id,
+                }
+                self.exits[key]["id"] = l.id
 
+                return [
+                    AddModule(l),
+                    ActivateModule(l.id),
+                ]
+        elif cmd[0]=='gn' or cmd[0]=='gon' or cmd[0]=='gonew':
+            ex = {
+                "name": cmd[1],
+                "description": cmd[2]
+            }
+
+            i = 1
+            for k in self.exits.keys():
+                if k.startswith("<<custom"):
+                    n = int(re.sub(r'<<custom([0-9]*)>>', '\\1', k))
+                    if n>=i:
+                        i = n+1
+
+            self.exits[f"<<custom{i}>>"] = ex
+            print(f"Entering '{cmd[1]}'")
+            l = Location.create_from_exit(self.llm, self.description, ex)
+            l.exits["<<back>>"] = {
+                "name": self.name,
+                "id": self.id,
+            }
+            self.exits[f"<<custom{i}>>"]["id"] = l.id
+
+            return [
+                AddModule(l),
+                ActivateModule(l.id),
+            ]
+        elif cmd[0]=='gd' or cmd[0]=='god' or cmd[0]=='godel':
+            exit_number = int(cmd[1]) - 1
+            key = list(self.exits.keys())[exit_number]
+            ex = list(self.exits.values())[exit_number]
+
+            if key=="<<back>>":
+                print("Cannot delete the return path, the world will collapse into singularity.")
+            else:
+                print(f"Deleting the exit '{ex.get('name')}'. It disappears in a wisp of smoke...")
+                del self.exits[key]
+                if ex.get('id', None):
                     return [
-                        AddModule(l),
-                        ActivateModule(l.id),
+                        DeleteModule(ex.get('id')),
                     ]
-                except Exception as exc:
-                    print(exc)
-                    print("Failed. Repeat the action to try again")
+        else:
+            print("Command not recognised")
+    
 
     def describe(self):
         print()
