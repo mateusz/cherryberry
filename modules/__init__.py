@@ -1,2 +1,1 @@
-from .initialization import Initialization
-from .location import Location
+from .location import Location, LocationGenerator

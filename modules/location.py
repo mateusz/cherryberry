@@ -1,7 +1,7 @@
 from enum import Enum
 import json
 import hashlib
-from events import AddModule, ActivateModule, DeleteModule
+from events import AddModule, ActivateModule, DeleteModule, ConnectLocation
 import shlex
 import re
     
@@ -10,39 +10,13 @@ class Location_States(Enum):
 
 class Location():
     @staticmethod
-    def create_from_requirements(name, llm, requirements):
-        print(f"[Generating location description from '{requirements}'...]")
-        description = llm.generate_location(requirements)
-        print("[Looking for exits...]")
-        try:
-            exits = llm.find_exits(description)
-        except Exception as exc:
-            print("[No exits found, but you can use the ENTER command]")
-            exits = {}
-
+    def create(llm, name, description, exits):
         return Location(llm, {
             "name": name,
-            "state": Location_States.START,
             "description": description,
             "exits": exits,
-        })
-
-    @staticmethod
-    def create_from_exit(llm, previous, exit):
-        print("[Generating location description from exit]")
-        description = llm.generate_location_from_exit(previous, exit.get('name'), exit.get('description'))
-        print("[Looking for exits...]")
-        try:
-            exits = llm.find_exits(description)
-        except Exception as exc:
-            print("[No exits found, but you can use the ENTER command]")
-            exits = {}
-
-        return Location(llm, {
-            "name": exit.get('name'),
             "state": Location_States.START,
-            "description": description,
-            "exits": exits,
+            "id": hashlib.md5(description.encode('utf-8')).hexdigest()
         })
         
     def on_activate(self):
@@ -54,7 +28,7 @@ class Location():
         self.state = Location_States(from_data["state"])
         self.description = from_data["description"]
         self.exits = from_data["exits"]
-        self.id = hashlib.md5(self.description.encode('utf-8')).hexdigest()
+        self.id = from_data["id"]
 
     def on_input(self, line):
         cmd = shlex.split(line)
@@ -72,13 +46,7 @@ class Location():
                     ActivateModule(ex.get('id')),
                 ]
             else:
-                l = Location.create_from_exit(self.llm, self.description, ex)
-                l.exits["<<back>>"] = {
-                    "name": self.name,
-                    "id": self.id,
-                }
-                self.exits[key]["id"] = l.id
-
+                l = LocationGenerator.create_from_exit(self.llm, self, ex)
                 return [
                     AddModule(l),
                     ActivateModule(l.id),
@@ -98,12 +66,7 @@ class Location():
 
             self.exits[f"<<custom{i}>>"] = ex
             print(f"Entering '{cmd[1]}'")
-            l = Location.create_from_exit(self.llm, self.description, ex)
-            l.exits["<<back>>"] = {
-                "name": self.name,
-                "id": self.id,
-            }
-            self.exits[f"<<custom{i}>>"]["id"] = l.id
+            l = LocationGenerator.create_from_exit(self.llm, self, ex)
 
             return [
                 AddModule(l),
@@ -133,6 +96,9 @@ class Location():
         print()
         print(f"{self.description} [Ref: {self.id}]")
         print()
+        self.describe_exits()
+        
+    def describe_exits(self):
         print("Exits (use 'go NUM' to take an exit):")
         i = 0
         for key,ex in self.exits.items():
@@ -152,4 +118,148 @@ class Location():
             "state": self.state.value,
             "description": self.description,
             "exits": self.exits
-        }, sort_keys=True, indent=4)
+        }, indent=4)
+    
+class LocationGenerator_States(Enum):
+    GET_REQUIREMENTS = 1
+    AFTER_REQUIREMENTS = 2
+    AFTER_DESCRIPTION = 3
+
+class LocationGenerator():
+    @staticmethod
+    def create_from_user_input(name, llm):
+        return LocationGenerator(llm, {
+            "name": name,
+            "requirements": "",
+            "from_previous_id": None,
+            "from_previous_name": None,
+            "from_previous_description": None,
+            "from_exit": None,
+            "state": LocationGenerator_States.GET_REQUIREMENTS,
+            "description": "",
+            "exits": {},
+            "id": "LocationGenerator",
+        })
+
+    def create_from_exit(llm, previous, exit):
+        return LocationGenerator(llm, {
+            "name": exit.get('name'),
+            "requirements": None,
+            "from_previous_name": previous.name,
+            "from_previous_description": previous.description,
+            "from_previous_id": previous.id,
+            "from_exit": exit,
+            "state": LocationGenerator_States.AFTER_REQUIREMENTS,
+            "description": "",
+            "exits": {},
+            "id": "LocationGenerator",
+        })
+
+
+    def __init__(self, llm, from_data):
+        self.llm=llm
+        self.name = from_data["name"]
+        self.requirements = from_data["requirements"]
+        self.from_exit = from_data["from_exit"]
+        self.from_previous_id = from_data["from_previous_id"]
+        self.from_previous_name = from_data["from_previous_name"]
+        self.from_previous_description = from_data["from_previous_description"]
+        self.state = LocationGenerator_States(from_data["state"])
+        self.description = from_data["description"]
+        self.exits = from_data["exits"]
+        self.id = from_data["id"]
+        if self.state==LocationGenerator_States.AFTER_DESCRIPTION:
+            self.location = Location.create(self.llm, self.name, self.description, self.exits)
+        else:
+            self.location = None
+
+    def on_activate(self):
+        if self.state==LocationGenerator_States.GET_REQUIREMENTS:
+            print("Provide short description of the location, or ENTER for default:")
+        elif self.state==LocationGenerator_States.AFTER_REQUIREMENTS:
+            self.generate_description_from_requirements()
+        elif self.state==LocationGenerator_States.AFTER_DESCRIPTION:
+            self.location.describe()
+            print()
+            print("Do you want to keep this location? [KEEP/(reg)enerate/(rew)rite]")
+
+    def on_input(self, line):
+        if self.state==LocationGenerator_States.GET_REQUIREMENTS:
+            if line=="":
+                self.requirements = "a high-fantasy game, village location"
+            else:
+                self.requirements=line
+            self.generate_description_from_requirements()
+        elif self.state==LocationGenerator_States.AFTER_DESCRIPTION:
+            if line=="reg" or line=="regenerate":
+                self.description = ""
+                self.exits = {}
+                self.state = LocationGenerator_States.AFTER_REQUIREMENTS
+                self.generate_description_from_requirements()
+            elif line=="rew" or line=="rewrite":
+                self.requirements = ""
+                self.description = ""
+                self.exits = {}
+                self.state = LocationGenerator_States.GET_REQUIREMENTS
+                print()
+                print("Provide short description of the location, or ENTER for default:")
+            elif line=="" or line=="keep":
+                events = [
+                    DeleteModule(self.id),
+                    AddModule(self.location),
+                ]
+
+                if self.from_previous_id:
+                    events += [ConnectLocation(self.from_previous_id, self.location.id)]
+
+                events += ActivateModule(self.location.id),
+
+                return events
+
+    def generate_description_from_requirements(self):
+        print(f"### {self.name} ###")
+        if self.requirements:
+            stream=self.llm.generate_location(self.requirements)
+        else:
+            stream=self.llm.generate_location_from_exit(
+                self.from_previous_description,
+                self.from_exit.get('name'),
+                self.from_exit.get('description')
+            )
+
+        out=""
+        for output in stream:
+            out += output['choices'][0]['text']
+            print(output['choices'][0]['text'], end='', flush=True)
+        print()
+
+        self.description = out
+            
+        print("[Looking for exits...]")
+        try:
+            self.exits = self.llm.find_exits(self.description)
+        except Exception:
+            print("[No exits found]")
+            self.exits = {}
+
+        self.location = Location.create(self.llm, self.name, self.description, self.exits)
+        self.state = LocationGenerator_States.AFTER_DESCRIPTION
+        self.location.describe_exits()
+
+        print()
+        print("Do you want to keep this location? [KEEP/(reg)enerate/(rew)rite]")
+
+    def toJSON(self):
+        return json.dumps({
+            "id": self.id,
+            "name": self.name,
+            "class": self.__class__.__name__,
+            "requirements": self.requirements,
+            "from_previous_id": self.from_previous_id,
+            "from_previous_name": self.from_previous_name,
+            "from_previous_description": self.from_previous_description,
+            "from_exit": self.from_exit,
+            "state": self.state.value,
+            "description": self.description,
+            "exits": self.exits
+        }, indent=4)

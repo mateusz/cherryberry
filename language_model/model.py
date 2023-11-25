@@ -23,16 +23,17 @@ class Model:
         prompt = self.tmpl.get_template("00_generate_location.txt").render({
             "requirements": requirements
         })
-        compl = self.llm.create_completion(
+        stream = self.llm.create_completion(
             prompt=prompt,
             max_tokens=1024,
             temperature=1.2,
             repeat_penalty=1.1,
             top_p=0.95,
             top_k=40,
-            stop=["[INST]"],
+            stop=["\n\n"],
+            stream=True,
         )
-        return compl['choices'][0]['text']
+        return stream
 
     def generate_location_from_exit(self, previous, exit_name, exit_description):
         prompt = self.tmpl.get_template("05_generate_location_from_exit.txt").render({
@@ -40,47 +41,57 @@ class Model:
             "exit_name": exit_name,
             "exit_description": exit_description,
         })
-        compl = self.llm.create_completion(
+        stream = self.llm.create_completion(
             prompt=prompt,
             max_tokens=1024,
             temperature=1.2,
             repeat_penalty=1.1,
             top_p=0.95,
             top_k=40,
-            stop=["[INST]"],
+            stop=["\n\n"],
+            stream=True,
         )
-        return compl['choices'][0]['text']
+        return stream
 
 
     def json_fixer(self, json_str):
         prompt = self.tmpl.get_template("99_json_fixer.txt").render({
             "json": json_str,
         })
-        compl = self.llm.create_completion(
+        stream = self.llm.create_completion(
             prompt=prompt,
             max_tokens=1024,
             temperature=0.4,
             repeat_penalty=1.1,
             top_p=0.95,
             top_k=40,
-            stop=["[INST]"],
+            stop=["`"],
+            stream=True,
         )
-        return compl['choices'][0]['text']
+        return stream
 
     def find_exits(self, location_description):
         prompt = self.tmpl.get_template("10_find_exits.txt").render({
             "description": location_description
         })
-        compl = self.llm.create_completion(
+        stream = self.llm.create_completion(
             prompt=prompt,
             max_tokens=512,
             temperature=0.8,
             repeat_penalty=1.1,
             top_p=0.95,
             top_k=40,
-            stop=["[INST]"],
+            stop=["`"],
+            stream=True,
         )
-        out = "{\n    \"" + re.sub('`.*', '', compl['choices'][0]['text'])
+        
+        out="{\n    \""
+        for output in stream:
+            out += output['choices'][0]['text']
+            print('.', end='', flush=True)
+        print()
+
+        out = re.sub('`.*', '', out, re.M)
         try:
             obj = json.loads(out)
             return obj
@@ -100,9 +111,16 @@ class Model:
             pass
 
         print("[Attempting to fix JSON...]")
-        compl = self.json_fixer(out)
-        fix = re.sub('`.*', '', compl['choices'][0]['text'])
+        stream = self.json_fixer(out)
+
+        out="{\n    \""
+        for output in stream:
+            out += output['choices'][0]['text']
+            print('.', end='', flush=True)
+        print()
+
+        out = re.sub('`.*', '', out, re.M)
         try:
-            obj = json.loads(fix)
+            obj = json.loads(out)
         except Exception as exc:
             raise Exception(f"Unable to parse: {out}") from exc
