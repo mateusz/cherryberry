@@ -1,13 +1,13 @@
 ### Instruction:
 
-Generate a new location description for an text adventure game like Zork, using a description of an exit as seen from the previous site. Make sure to make the new location significantly different from the previous site. Include a few things the player can interact with, and a few possible exits. Do not use word "you", write in the third person perspective and avoid adjectives.
+Generate a new location description for an text adventure game like Zork. {{setting}}
 
-Previous site: {{previous}}
+Make sure the new location suits the entrance leading to it. The new location desription should be significantly different from the site the player is leaving. Do not use word "you", write in the third person perspective and avoid adjectives.
 
-Exit name: {{exit_name}}
+Site player is leaving, for context only: {{previous}}
 
-Exit was described as: {{exit_description}}
+Entrance leading to new location: {{exit_description}}
 
 ### Response: 
 
-One paragraph description of the new location: 
+Three sentence description of the new location: 

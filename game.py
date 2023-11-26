@@ -8,6 +8,7 @@ from events import AddModule, ActivateModule, ConnectLocation
 class Game:
 
     def __init__(self, from_save=None):
+        self.setting = "Game is set in a modern world torn by war, with much fighting still going on. The mood is dark and dangerous."
         self.llm = Model()
         self.all_modules = {}
         self.current_module = None
@@ -26,7 +27,7 @@ class Game:
                 c = json.loads(f.read())
                 self.events += [ActivateModule(c.get("current_module"))]
         else:
-            lg = LocationGenerator.create_from_user_input("Adventure awaits!", self.llm)
+            lg = LocationGenerator.create_from_user_input("Adventure awaits!", self.llm, self.setting)
             self.events += [AddModule(lg), ActivateModule(lg.id)]
 
     def run(self):

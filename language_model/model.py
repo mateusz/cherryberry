@@ -19,8 +19,9 @@ class Model:
         )
         #self.llm.set_cache(LlamaDiskCache('cache'))
 
-    def generate_location(self, requirements):
+    def generate_location(self, setting, requirements):
         prompt = self.tmpl.get_template("00_generate_location.txt").render({
+            "setting": setting,
             "requirements": requirements
         })
         stream = self.llm.create_completion(
@@ -35,8 +36,9 @@ class Model:
         )
         return stream
 
-    def generate_location_from_exit(self, previous, exit_name, exit_description):
+    def generate_location_from_exit(self, setting, previous, exit_name, exit_description):
         prompt = self.tmpl.get_template("05_generate_location_from_exit.txt").render({
+            "setting": setting,
             "previous": previous,
             "exit_name": exit_name,
             "exit_description": exit_description,
