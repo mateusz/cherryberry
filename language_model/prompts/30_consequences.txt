@@ -1,13 +1,19 @@
 ### Instruction:
 
-From supplied description, generate consequences of the action provided. Take permissibility into account.
+From supplied JSON inventory and the description of the location, generate consequences of your action. Take permissibility into account.
 
-Description: You are in a clearing, with a forest surrounding you on the west and south.
-There is a pile of leaves on the ground.
+Inventory:
 
-Action:  I rake the leaves into a tidy pile
+```json
+{{inventory}}
+```
 
-Permissibility:  The action 'I rake the leaves into a tidy pile' does not make sense for the character based on their inventory. The character has water, but no rake.
+Description: {{description}}
+
+Your action: {{action}}
+
+Permissibility: {{permissibility}}
 
 ### Response: 
 
+One sentence describing the consequences of your action: 

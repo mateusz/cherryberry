@@ -1,0 +1,17 @@
+### Instruction:
+
+Given the description of the location and the JSON inventory of the character, decide if the action player wishes to take is permissible.
+
+Location description: {{description}}
+
+Inventory:
+
+```json
+{{inventory}}
+```
+
+Action player wishes to take: {{action}}
+
+### Response: 
+
+Decide if the action is permissible: 

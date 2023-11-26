@@ -55,6 +55,131 @@ class Model:
         )
         return stream
 
+    def action_permissible(self, description, inventory, action):
+        if len(inventory)==0:
+            i = "{\n}"
+        else:
+            i = json.dumps(inventory, indent=4)
+        prompt = self.tmpl.get_template("20_action_permissible.txt").render({
+            "description": description,
+            "inventory": i,
+            "action": action,
+        })
+        stream = self.llm.create_completion(
+            prompt=prompt,
+            max_tokens=1024,
+            temperature=0.4,
+            repeat_penalty=1.1,
+            top_p=0.95,
+            top_k=40,
+            stop=["\n\n"],
+            stream=True,
+        )
+        return stream
+
+    def consequences(self, description, inventory, action, permissible):
+        if len(inventory)==0:
+            i = "{\n}"
+        else:
+            i = json.dumps(inventory, indent=4)
+        prompt = self.tmpl.get_template("30_consequences.txt").render({
+            "description": description,
+            "inventory": i,
+            "action": action,
+            "permissible": permissible,
+        })
+        stream = self.llm.create_completion(
+            prompt=prompt,
+            max_tokens=1024,
+            temperature=0.6,
+            repeat_penalty=1.1,
+            top_p=0.95,
+            top_k=40,
+            stop=["\n\n"],
+            stream=True,
+        )
+        return stream
+
+    def update_description(self, description, action, consequences):
+        prompt = self.tmpl.get_template("40_update_description.txt").render({
+            "description": description,
+            "action": action,
+            "consequences": consequences,
+        })
+        stream = self.llm.create_completion(
+            prompt=prompt,
+            max_tokens=1024,
+            temperature=0.4,
+            repeat_penalty=1.1,
+            top_p=0.95,
+            top_k=40,
+            stop=[],
+            stream=True,
+        )
+        return stream
+
+    def update_inventory(self, inventory, description, action, consequences):
+        if len(inventory)==0:
+            i = "{\n}"
+        else:
+            i = json.dumps(inventory, indent=4)
+        prompt = self.tmpl.get_template("50_update_inventory.txt").render({
+            "inventory": i,
+            "description": description,
+            "action": action,
+            "consequences": consequences,
+        })
+        stream = self.llm.create_completion(
+            prompt=prompt,
+            max_tokens=1024,
+            temperature=0.4,
+            repeat_penalty=1.1,
+            top_p=0.95,
+            top_k=40,
+            stop=['`'],
+            stream=True,
+        )
+        out="{\n    \""
+        for output in stream:
+            out += output['choices'][0]['text']
+            print('.', end='', flush=True)
+        print()
+        print(out)
+
+        out = re.sub('`.*', '', out, re.M)
+        try:
+            obj = json.loads(out)
+            return obj
+        except:
+            pass
+        
+        try:
+            obj = json.loads(out + "}")
+            return obj
+        except:
+            pass
+
+        try:
+            obj = json.loads(out + "} }")
+            return obj
+        except:
+            pass
+
+        print("[Attempting to fix JSON...]")
+        stream = self.json_fixer(out)
+
+        out="{\n    \""
+        for output in stream:
+            out += output['choices'][0]['text']
+            print('.', end='', flush=True)
+        print()
+
+        out = re.sub('`.*', '', out, re.M)
+        try:
+            obj = json.loads(out)
+            return obj
+        except Exception as exc:
+            raise Exception(f"Unable to parse: {out}") from exc
 
     def json_fixer(self, json_str):
         prompt = self.tmpl.get_template("99_json_fixer.txt").render({
@@ -124,5 +249,6 @@ class Model:
         out = re.sub('`.*', '', out, re.M)
         try:
             obj = json.loads(out)
+            return obj
         except Exception as exc:
             raise Exception(f"Unable to parse: {out}") from exc

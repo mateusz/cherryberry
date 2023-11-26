@@ -2,6 +2,7 @@ from enum import Enum
 import json
 import hashlib
 from events import AddModule, ActivateModule, DeleteModule, ConnectLocation
+from .action import Action
 import shlex
 import re
     
@@ -10,10 +11,9 @@ class Location_States(Enum):
 
 class Location():
     @staticmethod
-    def create(llm, setting, name, description, exits):
-        return Location(llm, {
+    def create(name, description, exits):
+        return Location({
             "name": name.strip(),
-            "setting": setting.strip(),
             "description": description.strip(),
             "exits": exits,
             "state": Location_States.START,
@@ -23,10 +23,9 @@ class Location():
     def on_activate(self):
         self.describe()
 
-    def __init__(self, llm, from_data):
-        self.llm=llm
+    def __init__(self, from_data):
+        self.gstate=None
         self.name = from_data["name"]
-        self.setting = from_data["setting"]
         self.state = Location_States(from_data["state"])
         self.description = from_data["description"]
         self.exits = from_data["exits"]
@@ -48,7 +47,7 @@ class Location():
                     ActivateModule(ex.get('id')),
                 ]
             else:
-                l = LocationGenerator.create_from_exit(self.llm, self, ex)
+                l = LocationGenerator.create_from_exit(self, ex)
                 return [
                     AddModule(l),
                     ActivateModule(l.id),
@@ -68,7 +67,7 @@ class Location():
 
             self.exits[f"<<custom{i}>>"] = ex
             print(f"Entering '{cmd[1]}'")
-            l = LocationGenerator.create_from_exit(self.llm, self, ex)
+            l = LocationGenerator.create_from_exit(self, ex)
 
             return [
                 AddModule(l),
@@ -88,6 +87,19 @@ class Location():
                     return [
                         DeleteModule(ex.get('id')),
                     ]
+        elif cmd[0]=='act' or cmd[0]=='a':
+            l = Action.create(self, cmd[1])
+            return [
+                AddModule(l),
+                ActivateModule(l.id),
+            ]
+        elif cmd[0]=='i' or cmd[0]=='inv' or cmd[0]=='inventory':
+            if len(self.gstate.inventory)==0:
+                print("Your inventory is empty")
+            else:
+                print("Your inventory:")
+                for k,v in self.gstate.inventory.items():
+                    print(f"[{k}] -> {v}")
         else:
             print("Command not recognised")
     
@@ -116,7 +128,6 @@ class Location():
         return json.dumps({
             "id": self.id,
             "name": self.name,
-            "setting": self.setting,
             "class": self.__class__.__name__,
             "state": self.state.value,
             "description": self.description,
@@ -130,10 +141,9 @@ class LocationGenerator_States(Enum):
 
 class LocationGenerator():
     @staticmethod
-    def create_from_user_input(name, llm, setting):
-        return LocationGenerator(llm, {
+    def create_from_user_input(name):
+        return LocationGenerator({
             "name": name,
-            "setting": setting,
             "requirements": "",
             "from_previous_id": None,
             "from_previous_name": None,
@@ -146,10 +156,9 @@ class LocationGenerator():
         })
 
     @staticmethod
-    def create_from_exit(llm, previous, exit):
-        return LocationGenerator(llm, {
+    def create_from_exit(previous, exit):
+        return LocationGenerator({
             "name": exit.get('name'),
-            "setting": previous.setting,
             "requirements": None,
             "from_previous_name": previous.name,
             "from_previous_description": previous.description,
@@ -162,10 +171,9 @@ class LocationGenerator():
         })
 
 
-    def __init__(self, llm, from_data):
-        self.llm=llm
+    def __init__(self, from_data):
+        self.gstate = None
         self.name = from_data["name"]
-        self.setting = from_data["setting"]
         self.requirements = from_data["requirements"]
         self.from_exit = from_data["from_exit"]
         self.from_previous_id = from_data["from_previous_id"]
@@ -176,7 +184,7 @@ class LocationGenerator():
         self.exits = from_data["exits"]
         self.id = from_data["id"]
         if self.state==LocationGenerator_States.AFTER_DESCRIPTION:
-            self.location = Location.create(self.llm, self.setting, self.name, self.description, self.exits)
+            self.location = Location.create(self.name, self.description, self.exits)
         else:
             self.location = None
 
@@ -226,10 +234,10 @@ class LocationGenerator():
     def generate_description_from_requirements(self):
         print(f"### {self.name} ###")
         if self.requirements:
-            stream=self.llm.generate_location(self.setting, self.requirements)
+            stream=self.gstate.llm.generate_location(self.gstate.setting, self.requirements)
         else:
-            stream=self.llm.generate_location_from_exit(
-                self.setting,
+            stream=self.gstate.llm.generate_location_from_exit(
+                self.gstate.setting,
                 self.from_previous_description,
                 self.from_exit.get('name'),
                 self.from_exit.get('description')
@@ -241,16 +249,16 @@ class LocationGenerator():
             print(output['choices'][0]['text'], end='', flush=True)
         print()
 
-        self.description = out
+        self.description = out.strip()
             
         print("[Looking for exits...]")
         try:
-            self.exits = self.llm.find_exits(self.description)
+            self.exits = self.gstate.llm.find_exits(self.description)
         except Exception:
             print("[No exits found]")
             self.exits = {}
 
-        self.location = Location.create(self.llm, self.setting, self.name, self.description, self.exits)
+        self.location = Location.create(self.name, self.description, self.exits)
         self.state = LocationGenerator_States.AFTER_DESCRIPTION
         self.location.describe_exits()
 
@@ -261,7 +269,6 @@ class LocationGenerator():
         return json.dumps({
             "id": self.id,
             "name": self.name,
-            "setting": self.setting,
             "class": self.__class__.__name__,
             "requirements": self.requirements,
             "from_previous_id": self.from_previous_id,
