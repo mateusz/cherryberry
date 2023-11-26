@@ -1,6 +1,6 @@
 ### Instruction:
 
-From supplied JSON current inventory of the character, generate an updated inventory based on the location description, action and consequences provided. Make sure to remove items that have been lost or dropped, and add items that has been taken or picked up.
+From supplied JSON current inventory of the character, generate an updated inventory based on the location description, action and consequences provided. Make sure to remove items that have been used up, dropped or combined. Add items that has been picked up. Do not lose items that should remain.
 
 For the response, use the following schema:
 
@@ -25,7 +25,7 @@ Consequences: {{consequences}}
 
 ### Response: 
 
-JSON updated inventory (possibly unchanged, or some items removed, or some items added): 
+JSON updated inventory (possibly unchanged, possibly some items removed, possibly some items added): 
 
 ```json
 {

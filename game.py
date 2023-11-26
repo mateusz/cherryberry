@@ -8,7 +8,7 @@ from dataclasses import dataclass
 
 class GState:
     def __init__(self):
-        self.setting = "Game is set in a modern world torn by war, with much fighting still going on. The mood is dark and dangerous."
+        self.setting = "RPG game set in a modern world torn by war, with much fighting still going on. The player is a survivor in this dark and dangerous world."
         self.inventory = {}
         self.llm = Model()
 

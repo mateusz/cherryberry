@@ -1,0 +1,26 @@
+### Instruction:
+
+From supplied description of a current location, generate a JSON list of items available for picking. For each specific item, include item name and one-sentence description. Use the following schema:
+
+```json-schema
+{
+    "id1": {
+        "name": "Item name one",
+        "description": "Description of item one"
+    },
+    "id2": {
+        "name": "Item name two",
+        "description": "Description of item two"
+    }
+}
+```
+
+Current location description: {{description}}
+
+### Response: 
+
+Available items (things that can be picked up):
+
+```json
+{
+	"
