@@ -14,4 +14,4 @@ Action player wishes to take: {{action}}
 
 ### Response: 
 
-Decide if the action is permissible: 
+Decide if the action is permissible in one sentence: 

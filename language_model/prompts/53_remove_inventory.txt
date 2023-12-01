@@ -1,0 +1,28 @@
+### Instruction:
+
+From supplied JSON current inventory of the character, generate a list of items to remove from the inventory as a consequence of the activity provided.
+
+For the response, use the following schema:
+
+```json-schema
+{
+  "removed item one": "removed because reason one",
+  "removed item two": "removed because reason two"
+}
+```
+
+Current inventory:
+
+```json
+{{inventory}}
+```
+
+Activity: {{consequences}}
+
+### Response: 
+
+JSON list of items to remove (there may be nothing to remove!):
+
+```json
+{
+    "

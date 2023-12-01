@@ -8,4 +8,6 @@ Generate valid JSON from the following malformed JSON:
 
 ### Response: 
 
+Here is a fixed JSON, with fixed missing commas, quotes and brackets:
+
 ```json

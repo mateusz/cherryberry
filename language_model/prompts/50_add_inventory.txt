@@ -1,0 +1,28 @@
+### Instruction:
+
+From supplied JSON current inventory of the character, generate a list of items to add to the inventory as a consequence of the activity provided. Only add items that the character kept.
+
+For the response, use the following schema:
+
+```json-schema
+{
+  "added item one": "short one sentence item description one",
+  "added item two": "short one sentence item description two"
+}
+```
+
+Current inventory:
+
+```json
+{{inventory}}
+```
+
+Activity: {{consequences}}
+
+### Response: 
+
+JSON list of items to add (there may be nothing to add!):
+
+```json
+{
+    "
