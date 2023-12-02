@@ -8,6 +8,7 @@ from dataclasses import dataclass
 from textual.widgets import Static
 from textual.app import App
 from queue import Queue
+import logging
 
 
 class GState:
@@ -49,7 +50,9 @@ class Game:
 
                     modules = __import__("modules")
                     class_name = getattr(modules, c.get("class"))
-                    instance = class_name(from_data=c)
+                    instance = class_name(
+                        gstate=self.gstate, queue=self.queue, from_data=c
+                    )
                     self.events += [AddModule(instance)]
 
             self.events += [ActivateModule(game_config.get("current_module"))]
@@ -62,14 +65,12 @@ class Game:
         self.flush_events()
 
     def execute(self, line):
-        self.flush_events()
-        self.save_state()
-
         events = self.current_module.on_input(line)
         if events:
             self.events += events
 
         self.flush_events()
+        self.save_state()
 
     def flush_events(self):
         while True:
@@ -107,6 +108,7 @@ class Game:
                         src.exits[k]["id"] = dst.id
 
     def save_state(self):
+        print("Saving state...")
         for id, module in self.all_modules.items():
             with open(f"save/modules/{id}.json", "w", encoding="utf-8") as f:
                 f.write(module.toJSON())

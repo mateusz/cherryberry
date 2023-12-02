@@ -8,10 +8,10 @@ Input {
 }
 
 #buffer_panel {
-    width: 100%;
+    width: 125;
     background: $background 50%;
     margin: 0 0 1 0;
     height: 100%;
-    overflow: hidden auto;
     border: tall $background;
+    overflow: auto;
 }

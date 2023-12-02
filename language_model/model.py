@@ -1,10 +1,22 @@
-from llama_cpp import Llama, LlamaCache, LlamaDiskCache
+from llama_cpp import Llama, LlamaCache, LlamaDiskCache, llama_log_set
 from jinja2 import Environment, PackageLoader
 import json
 import re
 import time
 from textual.app import App
 from queue import Queue
+
+import ctypes
+
+
+def mute_llama(level, message, user_data):
+    pass
+
+
+log_callback = ctypes.CFUNCTYPE(None, ctypes.c_int, ctypes.c_char_p, ctypes.c_void_p)(
+    mute_llama
+)
+llama_log_set(log_callback, ctypes.c_void_p())
 
 
 class Model:
@@ -300,7 +312,7 @@ class Model:
         out = '{\n    "'
         for output in stream:
             out += output["choices"][0]["text"]
-            self.printb(".", end="", flush=True)
+            self.printb(output["choices"][0]["text"], end="", flush=True)
         self.printb()
 
         out = re.sub("`.*", "", out, re.M)

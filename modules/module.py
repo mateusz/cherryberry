@@ -10,8 +10,10 @@ class Module(ABC):
     gstate: any
     queue: Queue
 
-    def __init__(self, from_data):
-        self.gstate = None
+    def __init__(self, gstate, queue, from_data):
+        self.gstate = gstate
+        self.queue = queue
+
         for k, v in from_data.items():
             if k not in self.unmanaged_fields:
                 setattr(self, k, v)
@@ -23,7 +25,6 @@ class Module(ABC):
         self.queue = queue
 
     def printb(self, message="", end="\n", flush=False):
-        print(self)
         self.queue.put(message + end, block=False)
 
     @abstractmethod

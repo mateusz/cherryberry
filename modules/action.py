@@ -35,6 +35,8 @@ class Action(Module):
     @staticmethod
     def create(gstate, queue, location, action):
         a = Action(
+            gstate,
+            queue,
             {
                 "name": "Action",
                 "id": "Action",
@@ -48,14 +50,12 @@ class Action(Module):
                 "skip_description": False,
                 "skip_inventory": False,
                 "state": Action_States.BEGIN,
-            }
+            },
         )
-        a.set_state(gstate)
-        a.set_queue(queue)
         return a
 
-    def __init__(self, from_data):
-        super().__init__(from_data)
+    def __init__(self, gstate, queue, from_data):
+        super().__init__(gstate, queue, from_data)
         self.state = Action_States(from_data["state"])
         self.printb(
             "Does the updated inventory make sense? [KEEP/(reg)enerate/(s)kip/(d)elete N]"
@@ -115,6 +115,7 @@ class Action(Module):
                 self.update_inventory()
             elif line == "e" or line == "end":
                 self.skip_description = True
+                self.skip_inventory = True
                 self.state = Action_States.AFTER_UPDATED_INVENTORY
                 return self.finalize()
             else:

@@ -23,20 +23,20 @@ class Location(Module):
     @staticmethod
     def create(gstate, queue, name, description, exits):
         l = Location(
+            gstate,
+            queue,
             {
                 "name": name.strip(),
                 "description": description.strip(),
                 "exits": exits,
                 "state": Location_States.START,
                 "id": hashlib.md5(description.encode("utf-8")).hexdigest(),
-            }
+            },
         )
-        l.set_state(gstate)
-        l.set_queue(queue)
         return l
 
-    def __init__(self, from_data):
-        super().__init__(from_data)
+    def __init__(self, gstate, queue, from_data):
+        super().__init__(gstate, queue, from_data)
         self.state = Location_States(from_data["state"])
 
     def on_activate(self):
@@ -168,6 +168,8 @@ class LocationGenerator(Module):
     @staticmethod
     def create_from_user_input(gstate, queue, name):
         l = LocationGenerator(
+            gstate,
+            queue,
             {
                 "name": name,
                 "requirements": "",
@@ -179,15 +181,15 @@ class LocationGenerator(Module):
                 "description": "",
                 "exits": {},
                 "id": "LocationGenerator",
-            }
+            },
         )
-        l.set_state(gstate)
-        l.set_queue(queue)
         return l
 
     @staticmethod
     def create_from_exit(previous, exit):
         l = LocationGenerator(
+            previous.gstate,
+            previous.queue,
             {
                 "name": exit.get("name"),
                 "requirements": None,
@@ -199,14 +201,12 @@ class LocationGenerator(Module):
                 "description": "",
                 "exits": {},
                 "id": "LocationGenerator",
-            }
+            },
         )
-        l.set_state(previous.gstate)
-        l.set_queue(previous.queue)
         return l
 
-    def __init__(self, from_data):
-        super().__init__(from_data)
+    def __init__(self, gstate, queue, from_data):
+        super().__init__(gstate, queue, from_data)
         self.state = LocationGenerator_States(from_data["state"])
         if self.state == LocationGenerator_States.AFTER_DESCRIPTION:
             self.location = Location.create(
