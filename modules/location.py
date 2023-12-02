@@ -13,7 +13,7 @@ class Location_States(Enum):
 
 
 class Location(Module):
-    unmanaged_fields = ["gstate", "state"]
+    unmanaged_fields = ["gstate", "state", "queue"]
 
     name: str
     description: str
@@ -21,8 +21,8 @@ class Location(Module):
     state: Location_States
 
     @staticmethod
-    def create(name, description, exits):
-        return Location(
+    def create(gstate, queue, name, description, exits):
+        l = Location(
             {
                 "name": name.strip(),
                 "description": description.strip(),
@@ -31,6 +31,9 @@ class Location(Module):
                 "id": hashlib.md5(description.encode("utf-8")).hexdigest(),
             }
         )
+        l.set_state(gstate)
+        l.set_queue(queue)
+        return l
 
     def __init__(self, from_data):
         super().__init__(from_data)
@@ -48,7 +51,7 @@ class Location(Module):
             exit_number = int(cmd[1]) - 1
             key = list(self.exits.keys())[exit_number]
             ex = list(self.exits.values())[exit_number]
-            print(f"Taking the exit '{ex.get('name')}'")
+            self.printb(f"Taking the exit '{ex.get('name')}'")
 
             if ex.get("id", None):
                 return [
@@ -71,7 +74,7 @@ class Location(Module):
                         i = n + 1
 
             self.exits[f"<<custom{i}>>"] = ex
-            print(f"Entering '{cmd[1]}'")
+            self.printb(f"Entering '{cmd[1]}'")
             l = LocationGenerator.create_from_exit(self, ex)
 
             return [
@@ -84,11 +87,11 @@ class Location(Module):
             ex = list(self.exits.values())[exit_number]
 
             if key == "<<back>>":
-                print(
+                self.printb(
                     "Cannot delete the return path, the world will collapse into singularity."
                 )
             else:
-                print(
+                self.printb(
                     f"Deleting the exit '{ex.get('name')}'. It disappears in a wisp of smoke..."
                 )
                 del self.exits[key]
@@ -97,45 +100,45 @@ class Location(Module):
                         DeleteModule(ex.get("id")),
                     ]
         elif cmd[0] == "act" or cmd[0] == "a":
-            l = Action.create(self, cmd[1])
+            l = Action.create(self.gstate, self.queue, self, cmd[1])
             return [
                 AddModule(l),
                 ActivateModule(l.id),
             ]
         elif cmd[0] == "i" or cmd[0] == "inv" or cmd[0] == "inventory":
             if len(self.gstate.inventory) == 0:
-                print("Your inventory is empty")
+                self.printb("Your inventory is empty")
             else:
-                print("Your inventory:")
+                self.printb("Your inventory:")
                 for k, v in self.gstate.inventory.items():
-                    print(f"[{k}] -> {v}")
+                    self.printb(f"[{k}] -> {v}")
 
         elif cmd[0] == "id" or cmd[0] == "invdel":
             self.gstate.inventory[cmd[1]]
         else:
-            print("Command not recognised")
+            self.printb("Command not recognised")
 
     def describe(self):
-        print()
-        print(f"### {self.name} ###")
-        print()
-        print(f"{self.description} [Ref: {self.id}]")
-        print()
+        self.printb()
+        self.printb(f"### {self.name} ###")
+        self.printb()
+        self.printb(f"{self.description} [Ref: {self.id}]")
+        self.printb()
         self.describe_exits()
 
     def describe_exits(self):
-        print("Exits (use 'go NUM' to take an exit):")
+        self.printb("Exits (use 'go NUM' to take an exit):")
         i = 0
         for key, ex in self.exits.items():
             i += 1
             if key == "<<back>>":
-                print(f"[{i}] {ex.get('name')} (backtrack)")
+                self.printb(f"* [{i}] {ex.get('name')} (backtrack)")
             elif ex.get("id", None):
-                print(
-                    f"[{i}] {ex.get('name')} (visited) -> {ex.get('description')} (already visited)"
+                self.printb(
+                    f"* [{i}] {ex.get('name')} (visited) -> {ex.get('description')} (already visited)"
                 )
             else:
-                print(f"[{i}] {ex.get('name')} -> {ex.get('description')}")
+                self.printb(f"* [{i}] {ex.get('name')} -> {ex.get('description')}")
 
     def extra_json(self, d):
         d["state"] = self.state.value
@@ -149,7 +152,7 @@ class LocationGenerator_States(Enum):
 
 
 class LocationGenerator(Module):
-    unmanaged_fields = ["gstate", "state", "location"]
+    unmanaged_fields = ["gstate", "state", "queue", "location"]
 
     name: str
     requirements: str
@@ -163,8 +166,8 @@ class LocationGenerator(Module):
     location: Location
 
     @staticmethod
-    def create_from_user_input(name):
-        return LocationGenerator(
+    def create_from_user_input(gstate, queue, name):
+        l = LocationGenerator(
             {
                 "name": name,
                 "requirements": "",
@@ -178,10 +181,13 @@ class LocationGenerator(Module):
                 "id": "LocationGenerator",
             }
         )
+        l.set_state(gstate)
+        l.set_queue(queue)
+        return l
 
     @staticmethod
     def create_from_exit(previous, exit):
-        return LocationGenerator(
+        l = LocationGenerator(
             {
                 "name": exit.get("name"),
                 "requirements": None,
@@ -195,24 +201,33 @@ class LocationGenerator(Module):
                 "id": "LocationGenerator",
             }
         )
+        l.set_state(previous.gstate)
+        l.set_queue(previous.queue)
+        return l
 
     def __init__(self, from_data):
         super().__init__(from_data)
         self.state = LocationGenerator_States(from_data["state"])
         if self.state == LocationGenerator_States.AFTER_DESCRIPTION:
-            self.location = Location.create(self.name, self.description, self.exits)
+            self.location = Location.create(
+                self.gstate, self.queue, self.name, self.description, self.exits
+            )
         else:
             self.location = None
 
     def on_activate(self):
         if self.state == LocationGenerator_States.GET_REQUIREMENTS:
-            print("Provide short description of the location, or ENTER for default:")
+            self.printb(
+                "Provide short description of the location, or ENTER for default:"
+            )
         elif self.state == LocationGenerator_States.AFTER_REQUIREMENTS:
             self.generate_description_from_requirements()
         elif self.state == LocationGenerator_States.AFTER_DESCRIPTION:
             self.location.describe()
-            print()
-            print("Do you want to keep this location? [KEEP/(reg)enerate/(rew)rite]")
+            self.printb()
+            self.printb(
+                "Do you want to keep this location? [KEEP/(reg)enerate/(rew)rite]"
+            )
 
     def on_input(self, line):
         if self.state == LocationGenerator_States.GET_REQUIREMENTS:
@@ -232,8 +247,8 @@ class LocationGenerator(Module):
                 self.description = ""
                 self.exits = {}
                 self.state = LocationGenerator_States.GET_REQUIREMENTS
-                print()
-                print(
+                self.printb()
+                self.printb(
                     "Provide short description of the location, or ENTER for default:"
                 )
             elif line == "" or line == "keep":
@@ -250,7 +265,7 @@ class LocationGenerator(Module):
                 return events
 
     def generate_description_from_requirements(self):
-        print(f"### {self.name} ###")
+        self.printb(f"### {self.name} ###")
         if self.requirements:
             stream = self.gstate.llm.generate_location(
                 self.gstate.setting, self.requirements
@@ -266,24 +281,26 @@ class LocationGenerator(Module):
         out = ""
         for output in stream:
             out += output["choices"][0]["text"]
-            print(output["choices"][0]["text"], end="", flush=True)
-        print()
+            self.printb(output["choices"][0]["text"], end="", flush=True)
+        self.printb()
 
         self.description = out.strip()
 
-        print("[Looking for exits...]")
+        self.printb("[Looking for exits...]")
         try:
             self.exits = self.gstate.llm.find_exits(self.description)
         except Exception:
-            print("[No exits found]")
+            self.printb("[No exits found]")
             self.exits = {}
 
-        self.location = Location.create(self.name, self.description, self.exits)
+        self.location = Location.create(
+            self.gstate, self.queue, self.name, self.description, self.exits
+        )
         self.state = LocationGenerator_States.AFTER_DESCRIPTION
         self.location.describe_exits()
 
-        print()
-        print("Do you want to keep this location? [KEEP/(reg)enerate/(rew)rite]")
+        self.printb()
+        self.printb("Do you want to keep this location? [KEEP/(reg)enerate/(rew)rite]")
 
     def extra_json(self, d):
         d["state"] = self.state.value

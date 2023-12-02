@@ -1,12 +1,14 @@
 from abc import ABC, abstractmethod
 import json
+from queue import Queue
 
 
 class Module(ABC):
-    unmanaged_fields: list = ["gstate", "state"]
+    unmanaged_fields: list = ["gstate", "state", "queue"]
 
     id: str
     gstate: any
+    queue: Queue
 
     def __init__(self, from_data):
         self.gstate = None
@@ -16,6 +18,13 @@ class Module(ABC):
 
     def set_state(self, gstate):
         self.gstate = gstate
+
+    def set_queue(self, queue):
+        self.queue = queue
+
+    def printb(self, message="", end="\n", flush=False):
+        print(self)
+        self.queue.put(message + end, block=False)
 
     @abstractmethod
     def on_activate(self):

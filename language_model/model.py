@@ -3,10 +3,15 @@ from jinja2 import Environment, PackageLoader
 import json
 import re
 import time
+from textual.app import App
+from queue import Queue
 
 
 class Model:
-    def __init__(self):
+    queue: Queue
+
+    def __init__(self, queue):
+        self.queue = queue
         self.tmpl = Environment(loader=PackageLoader("language_model", "prompts"))
         self.llm = Llama(
             model_path="../models/LLaMA2-13B-Psyfighter2.Q4_K_M.gguf",
@@ -19,6 +24,9 @@ class Model:
             seed=int(time.time()),
         )
         # self.llm.set_cache(LlamaDiskCache('cache'))
+
+    def printb(self, message="", end="\n", flush=False):
+        self.queue.put(message + end, block=False)
 
     def generate_location(self, setting, requirements):
         prompt = self.tmpl.get_template("00_generate_location.txt").render(
@@ -154,8 +162,8 @@ class Model:
         out = '{\n    "'
         for output in stream:
             out += output["choices"][0]["text"]
-            print(output["choices"][0]["text"], end="", flush=True)
-        print()
+            self.printb(output["choices"][0]["text"], end="", flush=True)
+        self.printb()
 
         out = re.sub("`.*", "", out, re.M)
         try:
@@ -176,14 +184,14 @@ class Model:
         except:
             pass
 
-        print("[Attempting to fix JSON...]")
+        self.printb("[Attempting to fix JSON...]")
         stream = self.json_fixer(out)
 
         out = '{\n    "'
         for output in stream:
             out += output["choices"][0]["text"]
-            print(".", end="", flush=True)
-        print()
+            self.printb(".", end="", flush=True)
+        self.printb()
 
         out = re.sub("`.*", "", out, re.M)
         try:
@@ -218,8 +226,8 @@ class Model:
         out = '{\n    "'
         for output in stream:
             out += output["choices"][0]["text"]
-            print(output["choices"][0]["text"], end="", flush=True)
-        print()
+            self.printb(output["choices"][0]["text"], end="", flush=True)
+        self.printb()
 
         out = re.sub("`.*", "", out, re.M)
         try:
@@ -240,14 +248,14 @@ class Model:
         except:
             pass
 
-        print("[Attempting to fix JSON...]")
+        self.printb("[Attempting to fix JSON...]")
         stream = self.json_fixer(out)
 
         out = '{\n    "'
         for output in stream:
             out += output["choices"][0]["text"]
-            print(output["choices"][0]["text"], end="", flush=True)
-        print()
+            self.printb(output["choices"][0]["text"], end="", flush=True)
+        self.printb()
 
         out = re.sub("`.*", "", out, re.M)
         try:
@@ -292,8 +300,8 @@ class Model:
         out = '{\n    "'
         for output in stream:
             out += output["choices"][0]["text"]
-            print(".", end="", flush=True)
-        print()
+            self.printb(".", end="", flush=True)
+        self.printb()
 
         out = re.sub("`.*", "", out, re.M)
         try:
@@ -314,14 +322,14 @@ class Model:
         except:
             pass
 
-        print("[Attempting to fix JSON...]")
+        self.printb("[Attempting to fix JSON...]")
         stream = self.json_fixer(out)
 
         out = '{\n    "'
         for output in stream:
             out += output["choices"][0]["text"]
-            print(".", end="", flush=True)
-        print()
+            self.printb(".", end="", flush=True)
+        self.printb()
 
         out = re.sub("`.*", "", out, re.M)
         try:
