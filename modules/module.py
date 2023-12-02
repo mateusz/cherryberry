@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 import json
 from queue import Queue
+from events import BufferUpdated, GenerateUpdated, GenerateCleared
 
 
 class Module(ABC):
@@ -25,7 +26,13 @@ class Module(ABC):
         self.queue = queue
 
     def printb(self, message="", end="\n", flush=False):
-        self.queue.put(message + end, block=False)
+        self.queue.put(BufferUpdated(message + end), block=False)
+
+    def printg(self, message="", end="\n", flush=False):
+        self.queue.put(GenerateUpdated(message + end), block=False)
+
+    def clearg(self):
+        self.queue.put(GenerateCleared(), block=False)
 
     @abstractmethod
     def on_activate(self):

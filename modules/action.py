@@ -57,32 +57,35 @@ class Action(Module):
     def __init__(self, gstate, queue, from_data):
         super().__init__(gstate, queue, from_data)
         self.state = Action_States(from_data["state"])
-        self.printb(
-            "Does the updated inventory make sense? [KEEP/(reg)enerate/(s)kip/(d)elete N]"
-        )
 
     def on_activate(self):
         if self.state == Action_States.BEGIN:
             self.printb(f"* Action: {self.action}")
+            self.printb()
             self.action_permissible()
         elif self.state == Action_States.AFTER_PERMISSIBLE:
             self.printb(f"* Action: {self.action}")
             self.printb(f"* Permissibility: {self.permissible}")
-            self.printb("Does this statement make sense? [KEEP/(reg)enerate]")
+            self.printb()
+            self.printb(
+                "[deep_sky_blue4]Does this statement make sense? [KEEP/(reg)enerate][/]"
+            )
         elif self.state == Action_States.AFTER_CONSEQUENCES:
             self.printb(f"* Action: {self.action}")
             self.printb(f"* Permissibility: {self.permissible}")
             self.printb(f"* Consequences: {self.consequences}")
+            self.printb()
             self.printb(
-                "Do the consequences make sense? [KEEP/(reg)enerate/keep and skip to (i)nventory/keep and skip to (e)nd]"
+                "[deep_sky_blue4]Do the consequences make sense? [KEEP/(reg)enerate/keep and skip to (i)nventory/keep and skip to (e)nd][/]"
             )
         elif self.state == Action_States.AFTER_UPDATED_DESCRIPTION:
             self.printb(f"* Action: {self.action}")
             self.printb(f"* Permissibility: {self.permissible}")
             self.printb(f"* Consequences: {self.consequences}")
             self.printb(f"* New description: {self.new_description}")
+            self.printb()
             self.printb(
-                "Would you like to keep the new description? [KEEP/(reg)enerate/(s)kip/keep and skip to (e)nd]"
+                "[deep_sky_blue4]Would you like to keep the new description? [KEEP/(reg)enerate/(s)kip/keep and skip to (e)nd][/]"
             )
         elif self.state == Action_States.AFTER_UPDATED_INVENTORY:
             self.printb(f"* Action: {self.action}")
@@ -93,8 +96,9 @@ class Action(Module):
             else:
                 self.printb(f"* New description: {self.new_description}")
             self.print_inventory()
+            self.printb()
             self.printb(
-                "Does the updated inventory make sense? [KEEP/(reg)enerate/(s)kip/(d)elete N/(a)dd 'item' 'description']"
+                "[deep_sky_blue4]Does the updated inventory make sense? [KEEP/(reg)enerate/(s)kip/(d)elete N/(a)dd 'item' 'description'][/]"
             )
 
     def on_input(self, line):
@@ -156,7 +160,7 @@ class Action(Module):
                 del self.new_inventory[key]
                 self.print_inventory()
                 self.printb(
-                    "Does the updated inventory make sense? [KEEP/(reg)enerate/(s)kip/(d)elete N/(a)dd 'item' 'description']"
+                    "[deep_sky_blue4]Does the updated inventory make sense? [KEEP/(reg)enerate/(s)kip/(d)elete N/(a)dd 'item' 'description'][/]"
                 )
 
             elif cmd[0] == "a" or cmd[0] == "add":
@@ -164,7 +168,7 @@ class Action(Module):
                 self.printb(f"Added item '{cmd[1]}'")
                 self.print_inventory()
                 self.printb(
-                    "Does the updated inventory make sense? [KEEP/(reg)enerate/(s)kip/(d)elete N/(a)dd 'item' 'description']"
+                    "[deep_sky_blue4]Does the updated inventory make sense? [KEEP/(reg)enerate/(s)kip/(d)elete N/(a)dd 'item' 'description'][/]"
                 )
 
             elif cmd[0] == "s" or cmd[0] == "skip":
@@ -173,71 +177,53 @@ class Action(Module):
                 return self.finalize()
 
             else:
-                self.printb("Command not recognised")
+                self.printb("[deep_sky_blue4]Command not recognised[/deep_sky_blue4]")
 
     def action_permissible(self):
-        self.printb("[Deciding if the action is permissible]")
-        stream = self.gstate.llm.action_permissible(
+        out = self.gstate.llm.action_permissible(
             self.location_description, self.gstate.inventory, self.action
         )
 
-        out = ""
-        for output in stream:
-            out += output["choices"][0]["text"]
-            self.printb(output["choices"][0]["text"], end="", flush=True)
-        self.printb()
-
-        self.permissible = out.strip()
+        self.permissible = out
         self.state = Action_States.AFTER_PERMISSIBLE
 
-        self.printb("Does this statement make sense? [KEEP/(reg)enerate]")
+        self.printb()
+        self.printb(
+            "[deep_sky_blue4]Does this statement make sense? [KEEP/(reg)enerate][/]"
+        )
 
     def generate_consequences(self):
-        self.printb("[Generating consequences]")
-        stream = self.gstate.llm.consequences(
+        out = self.gstate.llm.consequences(
             self.location_description,
             self.gstate.inventory,
             self.action,
             self.permissible,
         )
 
-        out = ""
-        for output in stream:
-            out += output["choices"][0]["text"]
-            self.printb(output["choices"][0]["text"], end="", flush=True)
-        self.printb()
-
-        self.consequences = out.strip()
+        self.consequences = out
         self.state = Action_States.AFTER_CONSEQUENCES
 
+        self.printb()
         self.printb(
-            "Do the consequences make sense? [KEEP/(reg)enerate/keep and skip to (i)nventory/keep and skip to (e)nd]"
+            "[deep_sky_blue4]Do the consequences make sense? [KEEP/(reg)enerate/keep and skip to (i)nventory/keep and skip to (e)nd][/]"
         )
 
     def update_description(self):
-        self.printb("[Generating updated description]")
-        stream = self.gstate.llm.add_description(
+        out = self.gstate.llm.add_description(
             self.location_description, self.action, self.consequences
         )
 
-        self.printb(self.location_description)
-        out = ""
-        for output in stream:
-            out += output["choices"][0]["text"]
-            self.printb(output["choices"][0]["text"], end="", flush=True)
-        self.printb()
-
-        self.new_description = self.location_description + "\n\n" + out.strip()
+        self.new_description = self.location_description + "\n\n" + out
         self.state = Action_States.AFTER_UPDATED_DESCRIPTION
 
+        self.printb()
         self.printb(
-            "Would you like to keep the new description? [KEEP/(reg)enerate/(s)kip/keep and skip to (e)nd]"
+            "[deep_sky_blue4]Would you like to keep the new description? [KEEP/(reg)enerate/(s)kip/keep and skip to (e)nd][/]"
         )
 
     def update_inventory(self):
         self.new_inventory = self.gstate.inventory
         try:
-            self.printb("[Looking for items to remove]")
             remove_inventory = self.gstate.llm.remove_inventory(
                 self.gstate.inventory,
                 self.location_description,
@@ -248,7 +234,6 @@ class Action(Module):
                 if k in self.new_inventory:
                     del self.new_inventory[k]
 
-            self.printb("[Looking for items to add]")
             add_inventory = self.gstate.llm.add_inventory(
                 self.gstate.inventory,
                 self.location_description,
@@ -259,14 +244,15 @@ class Action(Module):
                 self.new_inventory[k] = v
 
         except Exception as e:
-            self.printb("[No changes found]")
+            self.printb("[deep_sky_blue4][No changes found][/]")
             self.new_inventory = self.gstate.inventory
 
         self.state = Action_States.AFTER_UPDATED_INVENTORY
 
         self.print_inventory()
+        self.printb()
         self.printb(
-            "Does the updated inventory make sense? [KEEP/(reg)enerate/(s)kip/(d)elete N/(a)dd 'item' 'description']"
+            "[deep_sky_blue4]Does the updated inventory make sense? [KEEP/(reg)enerate/(s)kip/(d)elete N/(a)dd 'item' 'description'][/]"
         )
 
     def print_inventory(self):
@@ -279,7 +265,7 @@ class Action(Module):
             i = 0
             for k, v in self.new_inventory.items():
                 i += 1
-                self.printb(f"[{i}] -> {k} ({v})")
+                self.printb(f"[orange4]({i})[/] -> {k} ({v})")
 
     def finalize(self):
         if not self.skip_inventory:

@@ -20,6 +20,17 @@ class Location(Module):
     exits: object
     state: Location_States
 
+    help_text = """\
+[u]Commands:[/]
+[orange4]a "<action>"[/] - Perform action (switches to action generator)
+[orange4]g,go <num>[/] - Go through the numbered exit (possibly switches to location generator))
+[orange4]gn,gon,gonew "<name>" "<description>"[/] - Go to a new location (switches to location generator)
+[orange4]gd,god,godel <num>[/] - Delete numbered exit
+[orange4]h,help[/] - This text
+[orange4]i,inv,inventory[/] - Show inventory
+[orange4]l,look[/] - Repeat location description
+"""
+
     @staticmethod
     def create(gstate, queue, name, description, exits):
         l = Location(
@@ -45,13 +56,19 @@ class Location(Module):
     def on_input(self, line):
         cmd = shlex.split(line)
 
-        if cmd[0] == "look" or cmd[0] == "l":
+        if len(cmd) == 0:
+            self.printb()
+            self.printb(
+                "[deep_sky_blue4]Command not recognised, try 'help'[/deep_sky_blue4]"
+            )
+        elif cmd[0] == "look" or cmd[0] == "l":
             self.describe()
         elif cmd[0] == "go" or cmd[0] == "g":
             exit_number = int(cmd[1]) - 1
             key = list(self.exits.keys())[exit_number]
             ex = list(self.exits.values())[exit_number]
-            self.printb(f"Taking the exit '{ex.get('name')}'")
+            self.printb()
+            self.printb(f"[italic green4]Taking the exit '{ex.get('name')}'[/]")
 
             if ex.get("id", None):
                 return [
@@ -107,38 +124,48 @@ class Location(Module):
             ]
         elif cmd[0] == "i" or cmd[0] == "inv" or cmd[0] == "inventory":
             if len(self.gstate.inventory) == 0:
-                self.printb("Your inventory is empty")
+                self.printb()
+                self.printb("[u]Your inventory is empty[/]")
             else:
-                self.printb("Your inventory:")
+                self.printb()
+                self.printb("[u]Your inventory:[/]")
                 for k, v in self.gstate.inventory.items():
-                    self.printb(f"[{k}] -> {v}")
+                    self.printb(f"[orange4]{k}[/] -> {v}")
 
-        elif cmd[0] == "id" or cmd[0] == "invdel":
-            self.gstate.inventory[cmd[1]]
+        elif cmd[0] == "help" or cmd[0] == "h":
+            self.printb()
+            self.printb(self.help_text)
+
         else:
-            self.printb("Command not recognised")
+            self.printb()
+            self.printb("[deep_sky_blue4]Command not recognised, try 'help'[/]")
 
     def describe(self):
         self.printb()
-        self.printb(f"### {self.name} ###")
+        self.printb(f"[bold deep_pink3]--- {self.name} ---[/]")
+        self.printb(f"[grey46][Ref: {self.id}][/]")
         self.printb()
-        self.printb(f"{self.description} [Ref: {self.id}]")
-        self.printb()
+        self.printb(f"{self.description}")
         self.describe_exits()
 
     def describe_exits(self):
-        self.printb("Exits (use 'go NUM' to take an exit):")
+        self.printb()
+        self.printb("[u]Exits:[/]")
         i = 0
         for key, ex in self.exits.items():
             i += 1
             if key == "<<back>>":
-                self.printb(f"* [{i}] {ex.get('name')} (backtrack)")
+                self.printb(
+                    f"[orange4]({i}) {ex.get('name')} [italic](backtrack)[/][/]"
+                )
             elif ex.get("id", None):
                 self.printb(
-                    f"* [{i}] {ex.get('name')} (visited) -> {ex.get('description')} (already visited)"
+                    f"[orange4]({i}) {ex.get('name')} [italic](visited)[/][/] -> {ex.get('description')} (already visited)"
                 )
             else:
-                self.printb(f"* [{i}] {ex.get('name')} -> {ex.get('description')}")
+                self.printb(
+                    f"[orange4]({i}) {ex.get('name')} [/]-> {ex.get('description')}"
+                )
 
     def extra_json(self, d):
         d["state"] = self.state.value
@@ -226,7 +253,7 @@ class LocationGenerator(Module):
             self.location.describe()
             self.printb()
             self.printb(
-                "Do you want to keep this location? [KEEP/(reg)enerate/(rew)rite]"
+                "[deep_sky_blue4]Do you want to keep this location? [KEEP/(reg)enerate/(rew)rite][/]"
             )
 
     def on_input(self, line):
@@ -265,28 +292,23 @@ class LocationGenerator(Module):
                 return events
 
     def generate_description_from_requirements(self):
-        self.printb(f"### {self.name} ###")
+        self.printb()
+        self.printb(f"[bold deep_pink3]--- {self.name} ---[/]")
+        self.printb()
         if self.requirements:
-            stream = self.gstate.llm.generate_location(
+            out = self.gstate.llm.generate_location(
                 self.gstate.setting, self.requirements
             )
         else:
-            stream = self.gstate.llm.generate_location_from_exit(
+            out = self.gstate.llm.generate_location_from_exit(
                 self.gstate.setting,
                 self.from_previous_description,
                 self.from_exit.get("name"),
                 self.from_exit.get("description"),
             )
 
-        out = ""
-        for output in stream:
-            out += output["choices"][0]["text"]
-            self.printb(output["choices"][0]["text"], end="", flush=True)
-        self.printb()
+        self.description = out
 
-        self.description = out.strip()
-
-        self.printb("[Looking for exits...]")
         try:
             self.exits = self.gstate.llm.find_exits(self.description)
         except Exception:
@@ -300,7 +322,9 @@ class LocationGenerator(Module):
         self.location.describe_exits()
 
         self.printb()
-        self.printb("Do you want to keep this location? [KEEP/(reg)enerate/(rew)rite]")
+        self.printb(
+            "[deep_sky_blue4]Do you want to keep this location? [KEEP/(reg)enerate/(rew)rite][/]"
+        )
 
     def extra_json(self, d):
         d["state"] = self.state.value

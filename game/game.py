@@ -10,6 +10,13 @@ from textual.app import App
 from queue import Queue
 import logging
 
+# Style:
+# title: bold deep_pink3
+# prompt: deep_sky_blue4
+# subsection: u
+# list member: orange4
+# unimportant: grey46
+
 
 class GState:
     setting: str
@@ -17,7 +24,17 @@ class GState:
     llm: Model
 
     def __init__(self, queue):
-        self.setting = "RPG game set in a modern world torn by war, with much fighting still going on. The player is a survivor in this dark and dangerous world."
+        # self.setting = "RPG game set in a modern world torn by war, with much fighting still going on. The player is a survivor in this dark and dangerous world."
+        self.setting = """\
+RPG game set in an expansive Canadian frozen wilderness in the \
+aftermath of a geomagnetic disaster. There are no zombies -- only \
+the cold and all the threats Mother Nature can muster.
+
+The player is a lone survivor. Bright lights flare across the \
+sky. The wind rages outside. A wolf howls in the distance. Supplies \
+are scarce and the power mysteriously went out.  How much longer \
+will the player survive?
+        """
         self.inventory = {}
         self.llm = Model(queue)
 

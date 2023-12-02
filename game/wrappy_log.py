@@ -5,6 +5,9 @@ from rich.cells import cell_len
 from textual.geometry import Size
 from textwrap import wrap
 
+from rich.text import Text
+import logging
+
 
 class WrappyLog(Log):
     def write(

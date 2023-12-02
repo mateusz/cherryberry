@@ -5,6 +5,7 @@ import re
 import time
 from textual.app import App
 from queue import Queue
+from events import BufferUpdated, GenerateUpdated, GenerateCleared
 
 import ctypes
 
@@ -38,9 +39,17 @@ class Model:
         # self.llm.set_cache(LlamaDiskCache('cache'))
 
     def printb(self, message="", end="\n", flush=False):
-        self.queue.put(message + end, block=False)
+        self.queue.put(BufferUpdated(message + end), block=False)
+
+    def printg(self, message="", end="\n", flush=False):
+        self.queue.put(GenerateUpdated(message + end), block=False)
+
+    def clearg(self):
+        self.queue.put(GenerateCleared(), block=False)
 
     def generate_location(self, setting, requirements):
+        self.printb("[grey46][Generating location...][/]")
+
         prompt = self.tmpl.get_template("00_generate_location.txt").render(
             {"setting": setting, "requirements": requirements}
         )
@@ -54,11 +63,19 @@ class Model:
             stop=["\n\n"],
             stream=True,
         )
-        return stream
+        out = ""
+        for output in stream:
+            out += output["choices"][0]["text"]
+            self.printb(output["choices"][0]["text"], end="", flush=True)
+        self.printb()
+
+        return out.strip()
 
     def generate_location_from_exit(
         self, setting, previous, exit_name, exit_description
     ):
+        self.printb("[grey46][Generating location from exit...][/]")
+
         prompt = self.tmpl.get_template("05_generate_location_from_exit.txt").render(
             {
                 "setting": setting,
@@ -77,9 +94,17 @@ class Model:
             stop=["\n\n"],
             stream=True,
         )
-        return stream
+        out = ""
+        for output in stream:
+            out += output["choices"][0]["text"]
+            self.printb(output["choices"][0]["text"], end="", flush=True)
+
+        self.printb()
+        return out.strip()
 
     def action_permissible(self, description, inventory, action):
+        self.printb("[grey46][Generating permissible statement...][/]")
+
         if len(inventory) == 0:
             i = "{\n}"
         else:
@@ -101,9 +126,17 @@ class Model:
             stop=["\n\n"],
             stream=True,
         )
-        return stream
+        out = ""
+        for output in stream:
+            out += output["choices"][0]["text"]
+            self.printb(output["choices"][0]["text"], end="", flush=True)
+
+        self.printb()
+        return out.strip()
 
     def consequences(self, description, inventory, action, permissible):
+        self.printb("[grey46][Generating consequences...][/]")
+
         if len(inventory) == 0:
             i = "{\n}"
         else:
@@ -126,9 +159,17 @@ class Model:
             stop=["\n\n"],
             stream=True,
         )
-        return stream
+        out = ""
+        for output in stream:
+            out += output["choices"][0]["text"]
+            self.printb(output["choices"][0]["text"], end="", flush=True)
+
+        self.printb()
+        return out.strip()
 
     def add_description(self, description, action, consequences):
+        self.printg("[grey46]] add description...][/]")
+
         prompt = self.tmpl.get_template("40_add_description.txt").render(
             {
                 "description": description,
@@ -146,9 +187,18 @@ class Model:
             stop=[],
             stream=True,
         )
-        return stream
+
+        out = ""
+        for output in stream:
+            out += output["choices"][0]["text"]
+            self.printb(output["choices"][0]["text"], end="", flush=True)
+
+        self.printb()
+        return out.strip()
 
     def add_inventory(self, inventory, description, action, consequences):
+        self.printb("[grey46][Generating add inventory][/]")
+
         if len(inventory) == 0:
             i = "{\n}"
         else:
@@ -172,47 +222,49 @@ class Model:
             stream=True,
         )
         out = '{\n    "'
+        self.printg(out, end="")
         for output in stream:
             out += output["choices"][0]["text"]
-            self.printb(output["choices"][0]["text"], end="", flush=True)
-        self.printb()
+            self.printg(output["choices"][0]["text"], end="", flush=True)
+        self.printg()
 
         out = re.sub("`.*", "", out, re.M)
         try:
             obj = json.loads(out)
+            self.clearg()
             return obj
         except:
             pass
 
         try:
             obj = json.loads(out + "}")
+            self.clearg()
             return obj
         except:
             pass
 
         try:
             obj = json.loads(out + "} }")
+            self.clearg()
             return obj
         except:
             pass
 
-        self.printb("[Attempting to fix JSON...]")
-        stream = self.json_fixer(out)
-
-        out = '{\n    "'
-        for output in stream:
-            out += output["choices"][0]["text"]
-            self.printb(".", end="", flush=True)
-        self.printb()
+        self.printg("[Attempting to fix JSON...]")
+        out = self.json_fixer(out)
 
         out = re.sub("`.*", "", out, re.M)
         try:
             obj = json.loads(out)
+            self.clearg()
             return obj
         except Exception as exc:
+            self.clearg()
             raise Exception(f"Unable to parse: {out}") from exc
 
     def remove_inventory(self, inventory, description, action, consequences):
+        self.printb("[grey46][Generating remove inventory...][/]")
+
         if len(inventory) == 0:
             i = "{\n}"
         else:
@@ -236,44 +288,102 @@ class Model:
             stream=True,
         )
         out = '{\n    "'
+        self.printg(out, end="")
         for output in stream:
             out += output["choices"][0]["text"]
-            self.printb(output["choices"][0]["text"], end="", flush=True)
-        self.printb()
+            self.printg(output["choices"][0]["text"], end="", flush=True)
+        self.printg()
 
         out = re.sub("`.*", "", out, re.M)
         try:
             obj = json.loads(out)
+            self.clearg()
             return obj
         except:
             pass
 
         try:
             obj = json.loads(out + "}")
+            self.clearg()
             return obj
         except:
             pass
 
         try:
             obj = json.loads(out + "} }")
+            self.clearg()
             return obj
         except:
             pass
 
-        self.printb("[Attempting to fix JSON...]")
-        stream = self.json_fixer(out)
-
-        out = '{\n    "'
-        for output in stream:
-            out += output["choices"][0]["text"]
-            self.printb(output["choices"][0]["text"], end="", flush=True)
-        self.printb()
+        self.printg("[Attempting to fix JSON...]")
+        out = self.json_fixer(out)
 
         out = re.sub("`.*", "", out, re.M)
         try:
             obj = json.loads(out)
+            self.clearg()
             return obj
         except Exception as exc:
+            self.clearg()
+            raise Exception(f"Unable to parse: {out}") from exc
+
+    def find_exits(self, location_description):
+        self.printg("[grey46][Generating find exits...][/]")
+
+        prompt = self.tmpl.get_template("10_find_exits.txt").render(
+            {"description": location_description}
+        )
+        stream = self.llm.create_completion(
+            prompt=prompt,
+            max_tokens=512,
+            temperature=0.8,
+            repeat_penalty=1.1,
+            top_p=0.95,
+            top_k=40,
+            stop=["`"],
+            stream=True,
+        )
+
+        out = '{\n    "'
+        self.printg(out, end="")
+        for output in stream:
+            out += output["choices"][0]["text"]
+            self.printg(output["choices"][0]["text"], end="", flush=True)
+        self.printg()
+
+        out = re.sub("`.*", "", out, re.M)
+        try:
+            obj = json.loads(out)
+            self.clearg()
+            return obj
+        except:
+            pass
+
+        try:
+            obj = json.loads(out + "}")
+            self.clearg()
+            return obj
+        except:
+            pass
+
+        try:
+            obj = json.loads(out + "} }")
+            self.clearg()
+            return obj
+        except:
+            pass
+
+        self.printg("[Attempting to fix JSON...]")
+        out = self.json_fixer(out)
+
+        out = re.sub("`.*", "", out, re.M)
+        try:
+            obj = json.loads(out)
+            self.clearg()
+            return obj
+        except Exception as exc:
+            self.clearg()
             raise Exception(f"Unable to parse: {out}") from exc
 
     def json_fixer(self, json_str):
@@ -292,60 +402,10 @@ class Model:
             stop=["`"],
             stream=True,
         )
-        return stream
-
-    def find_exits(self, location_description):
-        prompt = self.tmpl.get_template("10_find_exits.txt").render(
-            {"description": location_description}
-        )
-        stream = self.llm.create_completion(
-            prompt=prompt,
-            max_tokens=512,
-            temperature=0.8,
-            repeat_penalty=1.1,
-            top_p=0.95,
-            top_k=40,
-            stop=["`"],
-            stream=True,
-        )
-
-        out = '{\n    "'
+        out = ""
         for output in stream:
             out += output["choices"][0]["text"]
-            self.printb(output["choices"][0]["text"], end="", flush=True)
-        self.printb()
+            self.printg(output["choices"][0]["text"], end="", flush=True)
 
-        out = re.sub("`.*", "", out, re.M)
-        try:
-            obj = json.loads(out)
-            return obj
-        except:
-            pass
-
-        try:
-            obj = json.loads(out + "}")
-            return obj
-        except:
-            pass
-
-        try:
-            obj = json.loads(out + "} }")
-            return obj
-        except:
-            pass
-
-        self.printb("[Attempting to fix JSON...]")
-        stream = self.json_fixer(out)
-
-        out = '{\n    "'
-        for output in stream:
-            out += output["choices"][0]["text"]
-            self.printb(".", end="", flush=True)
-        self.printb()
-
-        out = re.sub("`.*", "", out, re.M)
-        try:
-            obj = json.loads(out)
-            return obj
-        except Exception as exc:
-            raise Exception(f"Unable to parse: {out}") from exc
+        self.printg()
+        return out.strip()
