@@ -168,7 +168,7 @@ class Model:
         return out.strip()
 
     def add_description(self, description, action, consequences):
-        self.printg("[grey46]] add description...][/]")
+        self.printb("[grey46][Generating add description...][/]")
 
         prompt = self.tmpl.get_template("40_add_description.txt").render(
             {

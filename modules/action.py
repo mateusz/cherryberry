@@ -60,41 +60,46 @@ class Action(Module):
 
     def on_activate(self):
         if self.state == Action_States.BEGIN:
-            self.printb(f"* Action: {self.action}")
+            self.printb()
+            self.printb(f"[orange4]Action[/]: {self.action}")
             self.printb()
             self.action_permissible()
         elif self.state == Action_States.AFTER_PERMISSIBLE:
-            self.printb(f"* Action: {self.action}")
-            self.printb(f"* Permissibility: {self.permissible}")
+            self.printb()
+            self.printb(f"[orange4]Action[/]: {self.action}")
+            self.printb(f"[orange4]Permissibility[/]: {self.permissible}")
             self.printb()
             self.printb(
                 "[deep_sky_blue4]Does this statement make sense? [KEEP/(reg)enerate][/]"
             )
         elif self.state == Action_States.AFTER_CONSEQUENCES:
-            self.printb(f"* Action: {self.action}")
-            self.printb(f"* Permissibility: {self.permissible}")
-            self.printb(f"* Consequences: {self.consequences}")
+            self.printb()
+            self.printb(f"[orange4]Action[/]: {self.action}")
+            self.printb(f"[orange4]Permissibility[/]: {self.permissible}")
+            self.printb(f"[orange4]Consequences[/]: {self.consequences}")
             self.printb()
             self.printb(
                 "[deep_sky_blue4]Do the consequences make sense? [KEEP/(reg)enerate/keep and skip to (i)nventory/keep and skip to (e)nd][/]"
             )
         elif self.state == Action_States.AFTER_UPDATED_DESCRIPTION:
-            self.printb(f"* Action: {self.action}")
-            self.printb(f"* Permissibility: {self.permissible}")
-            self.printb(f"* Consequences: {self.consequences}")
-            self.printb(f"* New description: {self.new_description}")
+            self.printb()
+            self.printb(f"[orange4]Action[/]: {self.action}")
+            self.printb(f"[orange4]Permissibility[/]: {self.permissible}")
+            self.printb(f"[orange4]Consequences[/]: {self.consequences}")
+            self.printb(f"[orange4]New description[/]: {self.new_description}")
             self.printb()
             self.printb(
                 "[deep_sky_blue4]Would you like to keep the new description? [KEEP/(reg)enerate/(s)kip/keep and skip to (e)nd][/]"
             )
         elif self.state == Action_States.AFTER_UPDATED_INVENTORY:
-            self.printb(f"* Action: {self.action}")
-            self.printb(f"* Permissibility: {self.permissible}")
-            self.printb(f"* Consequences: {self.consequences}")
+            self.printb()
+            self.printb(f"[orange4]Action[/]: {self.action}")
+            self.printb(f"[orange4]Permissibility[/]: {self.permissible}")
+            self.printb(f"[orange4]Consequences[/]: {self.consequences}")
             if self.skip_description:
-                self.printb("* New description: [skipped]")
+                self.printb("[orange4]New description[/]: [skipped]")
             else:
-                self.printb(f"* New description: {self.new_description}")
+                self.printb(f"[orange4]New description[/]: {self.new_description}")
             self.print_inventory()
             self.printb()
             self.printb(
@@ -209,6 +214,7 @@ class Action(Module):
         )
 
     def update_description(self):
+        self.printb(self.location_description)
         out = self.gstate.llm.add_description(
             self.location_description, self.action, self.consequences
         )
@@ -222,7 +228,7 @@ class Action(Module):
         )
 
     def update_inventory(self):
-        self.new_inventory = self.gstate.inventory
+        self.new_inventory = self.gstate.inventory.copy()
         try:
             remove_inventory = self.gstate.llm.remove_inventory(
                 self.gstate.inventory,
@@ -245,7 +251,7 @@ class Action(Module):
 
         except Exception as e:
             self.printb("[deep_sky_blue4][No changes found][/]")
-            self.new_inventory = self.gstate.inventory
+            self.new_inventory = self.gstate.inventory.copy()
 
         self.state = Action_States.AFTER_UPDATED_INVENTORY
 
@@ -257,20 +263,17 @@ class Action(Module):
 
     def print_inventory(self):
         if self.skip_inventory:
-            self.printb("* New inventory: [skipped]")
+            self.printb("[orange4]New inventory[/]: [skipped]")
         elif len(self.new_inventory) == 0:
-            self.printb("* New inventory is empty")
+            self.printb("[orange4]New inventory[/]: empty")
         else:
-            self.printb("* New inventory:")
+            self.printb("[orange4]New inventory[/]:")
             i = 0
             for k, v in self.new_inventory.items():
                 i += 1
                 self.printb(f"[orange4]({i})[/] -> {k} ({v})")
 
     def finalize(self):
-        if not self.skip_inventory:
-            self.gstate.inventory = self.new_inventory
-
         events = [
             DeleteModule(self.id),
         ]

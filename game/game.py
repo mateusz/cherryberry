@@ -38,6 +38,12 @@ will the player survive?
         self.inventory = {}
         self.llm = Model(queue)
 
+    def copy(self):
+        n = GState(self.llm.queue)
+        n.setting = self.setting
+        n.inventory = self.inventory.copy()
+        return n
+
 
 class Game:
     queue: Queue
@@ -105,7 +111,7 @@ class Game:
             elif e.__class__.__name__ == "UpdateLocationDescription":
                 self.all_modules[e.id].description = e.description
             elif e.__class__.__name__ == "UpdateInventory":
-                self.gstate.inventory = e.new_inventory
+                self.gstate.inventory = e.new_inventory.copy()
                 for m in self.all_modules.values():
                     m.set_state(self.gstate)
             elif e.__class__.__name__ == "DeleteModule":

@@ -1,6 +1,6 @@
 ### Instruction:
 
-From supplied location description, generate an additional text to add to the description based on supplied action and consequences. Do not use word "you", write in the third person perspective, avoid adjectives. Do not describe what happened, only the current situation that is a result of the consequences.
+From supplied location description, generate an additional text to add to the description based on supplied action and consequences. Do not use word "you" or "they", avoid adjectives. Do not describe what happened, only the current situation that is a result of the consequences.
 
 Location description: {{description}}
 
@@ -10,4 +10,4 @@ Consequences: {{consequences}}
 
 ### Response: 
 
-Additional text (add one sentence at most, do not describe events): 
+Additional text (one sentence, do not describe events, actions or consequences): 

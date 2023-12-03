@@ -12,7 +12,7 @@ class Module(ABC):
     queue: Queue
 
     def __init__(self, gstate, queue, from_data):
-        self.gstate = gstate
+        self.gstate = gstate.copy()
         self.queue = queue
 
         for k, v in from_data.items():
@@ -20,7 +20,7 @@ class Module(ABC):
                 setattr(self, k, v)
 
     def set_state(self, gstate):
-        self.gstate = gstate
+        self.gstate = gstate.copy()
 
     def set_queue(self, queue):
         self.queue = queue

@@ -182,7 +182,7 @@ class LocationGenerator(Module):
     unmanaged_fields = ["gstate", "state", "queue", "location"]
 
     name: str
-    requirements: str
+    requirements: str = "Abandoned house"
     from_previous_id: str
     from_previous_name: str
     from_previous_description: str
@@ -245,7 +245,7 @@ class LocationGenerator(Module):
     def on_activate(self):
         if self.state == LocationGenerator_States.GET_REQUIREMENTS:
             self.printb(
-                "Provide short description of the location, or ENTER for default:"
+                "[deep_sky_blue4]Provide a short description of the location you wish to start at, or ENTER for 'abandoned house':[/]"
             )
         elif self.state == LocationGenerator_States.AFTER_REQUIREMENTS:
             self.generate_description_from_requirements()
@@ -258,9 +258,7 @@ class LocationGenerator(Module):
 
     def on_input(self, line):
         if self.state == LocationGenerator_States.GET_REQUIREMENTS:
-            if line == "":
-                self.requirements = "abandoned house"
-            else:
+            if line != "":
                 self.requirements = line
             self.generate_description_from_requirements()
         elif self.state == LocationGenerator_States.AFTER_DESCRIPTION:
