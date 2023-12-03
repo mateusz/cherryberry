@@ -20,22 +20,13 @@ import logging
 
 class GState:
     setting: str
-    inventory: object
+    inventory: list
     llm: Model
 
     def __init__(self, queue):
         # self.setting = "RPG game set in a modern world torn by war, with much fighting still going on. The player is a survivor in this dark and dangerous world."
-        self.setting = """\
-RPG game set in an expansive Canadian frozen wilderness in the \
-aftermath of a geomagnetic disaster. There are no zombies -- only \
-the cold and all the threats Mother Nature can muster.
-
-The player is a lone survivor. Bright lights flare across the \
-sky. The wind rages outside. A wolf howls in the distance. Supplies \
-are scarce and the power mysteriously went out.  How much longer \
-will the player survive?
-        """
-        self.inventory = {}
+        self.setting = "RPG game set in an expansive Canadian frozen wilderness in the aftermath of a geomagnetic disaster. The player is a lone survivor facing off against the nature."
+        self.inventory = []
         self.llm = Model(queue)
 
     def copy(self):

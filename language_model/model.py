@@ -106,9 +106,12 @@ class Model:
         self.printb("[grey46][Generating permissible statement...][/]")
 
         if len(inventory) == 0:
-            i = "{\n}"
+            i = "* INVENTORY IS EMPTY"
         else:
-            i = json.dumps(inventory, indent=4)
+            i = ""
+            for k in inventory:
+                i += f"* {k}"
+
         prompt = self.tmpl.get_template("20_action_permissible.txt").render(
             {
                 "description": description,
@@ -138,9 +141,12 @@ class Model:
         self.printb("[grey46][Generating consequences...][/]")
 
         if len(inventory) == 0:
-            i = "{\n}"
+            i = "* INVENTORY IS EMPTY"
         else:
-            i = json.dumps(inventory, indent=4)
+            i = ""
+            for k in inventory:
+                i += f"* {k}"
+
         prompt = self.tmpl.get_template("30_consequences.txt").render(
             {
                 "description": description,
@@ -196,14 +202,17 @@ class Model:
         self.printb()
         return out.strip()
 
-    def add_inventory(self, inventory, description, action, consequences):
-        self.printb("[grey46][Generating add inventory][/]")
+    def update_inventory(self, inventory, description, action, consequences):
+        self.printb("[grey46][Generating inventory updates][/]")
 
         if len(inventory) == 0:
-            i = "{\n}"
+            i = "* INVENTORY IS EMPTY"
         else:
-            i = json.dumps(inventory, indent=4)
-        prompt = self.tmpl.get_template("50_add_inventory.txt").render(
+            i = ""
+            for k in inventory:
+                i += f"* {k}"
+
+        prompt = self.tmpl.get_template("50_inventory_updates.txt").render(
             {
                 "inventory": i,
                 "description": description,
@@ -221,60 +230,22 @@ class Model:
             stop=["`"],
             stream=True,
         )
-        out = '{\n    "'
-        self.printg(out, end="")
+        out = "1. "
+        self.printb(out, end="")
         for output in stream:
             out += output["choices"][0]["text"]
-            self.printg(output["choices"][0]["text"], end="", flush=True)
-        self.printg()
+            self.printb(output["choices"][0]["text"], end="", flush=True)
+        self.printb()
+        updates = out
 
-        out = re.sub("`.*", "", out, re.M)
-        try:
-            obj = json.loads(out)
-            self.clearg()
-            return obj
-        except:
-            pass
-
-        try:
-            obj = json.loads(out + "}")
-            self.clearg()
-            return obj
-        except:
-            pass
-
-        try:
-            obj = json.loads(out + "} }")
-            self.clearg()
-            return obj
-        except:
-            pass
-
-        self.printg("[Attempting to fix JSON...]")
-        out = self.json_fixer(out)
-
-        out = re.sub("`.*", "", out, re.M)
-        try:
-            obj = json.loads(out)
-            self.clearg()
-            return obj
-        except Exception as exc:
-            self.clearg()
-            raise Exception(f"Unable to parse: {out}") from exc
-
-    def remove_inventory(self, inventory, description, action, consequences):
-        self.printb("[grey46][Generating remove inventory...][/]")
-
-        if len(inventory) == 0:
-            i = "{\n}"
-        else:
-            i = json.dumps(inventory, indent=4)
-        prompt = self.tmpl.get_template("53_remove_inventory.txt").render(
+        self.printb("[grey46][Generating update inventory][/]")
+        prompt = self.tmpl.get_template("55_update_inventory.txt").render(
             {
                 "inventory": i,
                 "description": description,
                 "action": action,
                 "consequences": consequences,
+                "updates": updates,
             }
         )
         stream = self.llm.create_completion(
@@ -287,46 +258,29 @@ class Model:
             stop=["`"],
             stream=True,
         )
-        out = '{\n    "'
+        out = "* "
         self.printg(out, end="")
         for output in stream:
             out += output["choices"][0]["text"]
             self.printg(output["choices"][0]["text"], end="", flush=True)
-        self.printg()
+        self.clearg()
 
-        out = re.sub("`.*", "", out, re.M)
-        try:
-            obj = json.loads(out)
-            self.clearg()
-            return obj
-        except:
-            pass
+        items = []
+        lines = re.split(r"[\n\*\-\+]", out.strip())
+        for l in lines:
+            if l.strip() == "":
+                continue
+            if not re.search(r":\s*$", l):
+                # if re.search(r"^\s*[\*\+\-] ", l):
+                l = re.sub(r"^\s*[\*\+\-] ", "", l)
+                l = re.sub(r"\(.*", "", l)
+                l = re.sub(r"\w+[0-9]\w*", "", l)
+                l = re.sub(r"\w*[0-9]\w+", "", l)
+                l = re.sub(r"\s\s", " ", l)
 
-        try:
-            obj = json.loads(out + "}")
-            self.clearg()
-            return obj
-        except:
-            pass
+                items += [l.strip()]
 
-        try:
-            obj = json.loads(out + "} }")
-            self.clearg()
-            return obj
-        except:
-            pass
-
-        self.printg("[Attempting to fix JSON...]")
-        out = self.json_fixer(out)
-
-        out = re.sub("`.*", "", out, re.M)
-        try:
-            obj = json.loads(out)
-            self.clearg()
-            return obj
-        except Exception as exc:
-            self.clearg()
-            raise Exception(f"Unable to parse: {out}") from exc
+        return items
 
     def find_exits(self, location_description):
         self.printg("[grey46][Generating find exits...][/]")

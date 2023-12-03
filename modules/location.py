@@ -129,8 +129,8 @@ class Location(Module):
             else:
                 self.printb()
                 self.printb("[u]Your inventory:[/]")
-                for k, v in self.gstate.inventory.items():
-                    self.printb(f"[orange4]{k}[/] -> {v}")
+                for k in self.gstate.inventory:
+                    self.printb(f"[orange4]{k}[/]")
 
         elif cmd[0] == "help" or cmd[0] == "h":
             self.printb()

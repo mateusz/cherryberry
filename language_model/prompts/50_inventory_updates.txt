@@ -1,0 +1,15 @@
+### Instruction:
+
+From supplied current inventory of the character, generate a list of updates that need to be done as a result of the activity. Items may need to be added, removed or edited.
+
+Current inventory:
+
+{{inventory}}
+
+Activity: {{consequences}}
+
+### Response: 
+
+List of required updates, reason step by step:
+
+1.

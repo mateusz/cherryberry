@@ -158,11 +158,11 @@ class Action(Module):
 
             elif cmd[0] == "d" or cmd[0] == "delete":
                 item_number = int(cmd[1]) - 1
-                key = list(self.new_inventory.keys())[item_number]
+                key = self.new_inventory[item_number]
                 self.printb(
                     f"Deleting item '{key}'. It disappears in a wisp of smoke..."
                 )
-                del self.new_inventory[key]
+                del self.new_inventory[item_number]
                 self.print_inventory()
                 self.printb(
                     "[deep_sky_blue4]Does the updated inventory make sense? [KEEP/(reg)enerate/(s)kip/(d)elete N/(a)dd 'item' 'description'][/]"
@@ -230,24 +230,12 @@ class Action(Module):
     def update_inventory(self):
         self.new_inventory = self.gstate.inventory.copy()
         try:
-            remove_inventory = self.gstate.llm.remove_inventory(
+            self.new_inventory = self.gstate.llm.update_inventory(
                 self.gstate.inventory,
                 self.location_description,
                 self.action,
                 self.consequences,
             )
-            for k, v in remove_inventory.items():
-                if k in self.new_inventory:
-                    del self.new_inventory[k]
-
-            add_inventory = self.gstate.llm.add_inventory(
-                self.gstate.inventory,
-                self.location_description,
-                self.action,
-                self.consequences,
-            )
-            for k, v in add_inventory.items():
-                self.new_inventory[k] = v
 
         except Exception as e:
             self.printb("[deep_sky_blue4][No changes found][/]")
@@ -269,9 +257,9 @@ class Action(Module):
         else:
             self.printb("[orange4]New inventory[/]:")
             i = 0
-            for k, v in self.new_inventory.items():
+            for k in self.new_inventory:
                 i += 1
-                self.printb(f"[orange4]({i})[/] -> {k} ({v})")
+                self.printb(f"({i}) {k}")
 
     def finalize(self):
         events = [

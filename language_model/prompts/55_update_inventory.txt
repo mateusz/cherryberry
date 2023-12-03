@@ -1,0 +1,17 @@
+### Instruction:
+
+Apply the provided list of updates to the supplied current inventory. Make sure to apply every upadete, and to not lose items.
+
+Current inventory:
+
+{{inventory}}
+
+Updates to apply:
+
+{{updates}}
+
+### Response: 
+
+Updated inventory:
+
+*
