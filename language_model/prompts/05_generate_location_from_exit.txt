@@ -6,7 +6,7 @@ Make sure the new location suits the entrance leading to it. The new location de
 
 Site player is leaving, for context only: {{previous}}
 
-Entrance leading to new location: {{exit_description}}
+Entrance leading to new location: {{exit_name}} - {{exit_description}}
 
 ### Response: 
 

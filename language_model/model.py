@@ -186,7 +186,7 @@ class Model:
         stream = self.llm.create_completion(
             prompt=prompt,
             max_tokens=2048,
-            temperature=0.4,
+            temperature=0.6,
             repeat_penalty=1.1,
             top_p=0.95,
             top_k=40,
@@ -223,7 +223,7 @@ class Model:
         stream = self.llm.create_completion(
             prompt=prompt,
             max_tokens=2048,
-            temperature=0.4,
+            temperature=0.6,
             repeat_penalty=1.1,
             top_p=0.95,
             top_k=40,

@@ -17,10 +17,17 @@ import logging
 # list member: orange4
 # unimportant: grey46
 
+# TODO:
+# - remove permissibility approval
+# - add location titles to prompts
+# - inventory, keep things in the brackets, maybe replace brackets
+# - allow option of complete location rewrite
+
 
 class GState:
     setting: str
     inventory: list
+    health: list
     llm: Model
 
     def __init__(self, queue):
