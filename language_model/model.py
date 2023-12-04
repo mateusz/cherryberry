@@ -132,9 +132,9 @@ class Model:
         out = ""
         for output in stream:
             out += output["choices"][0]["text"]
-            self.printb(output["choices"][0]["text"], end="", flush=True)
+            self.printg(output["choices"][0]["text"], end="", flush=True)
 
-        self.printb()
+        self.clearg()
         return out.strip()
 
     def consequences(self, description, inventory, action, permissible):
@@ -186,7 +186,7 @@ class Model:
         stream = self.llm.create_completion(
             prompt=prompt,
             max_tokens=2048,
-            temperature=0.6,
+            temperature=0.8,
             repeat_penalty=1.1,
             top_p=0.95,
             top_k=40,
@@ -227,15 +227,15 @@ class Model:
             repeat_penalty=1.1,
             top_p=0.95,
             top_k=40,
-            stop=["`"],
+            stop=[],
             stream=True,
         )
         out = "1. "
-        self.printb(out, end="")
+        self.printg(out)
         for output in stream:
             out += output["choices"][0]["text"]
-            self.printb(output["choices"][0]["text"], end="", flush=True)
-        self.printb()
+            self.printg(output["choices"][0]["text"], end="", flush=True)
+        self.printg()
         updates = out
 
         self.printb("[grey46][Generating update inventory][/]")
@@ -255,7 +255,7 @@ class Model:
             repeat_penalty=1.1,
             top_p=0.95,
             top_k=40,
-            stop=["`"],
+            stop=["\n\n"],
             stream=True,
         )
         out = "* "
@@ -266,14 +266,14 @@ class Model:
         self.clearg()
 
         items = []
-        lines = re.split(r"[\n\*\-\+]", out.strip())
+        lines = re.split(r"[\n\*]", out.strip())
         for l in lines:
             if l.strip() == "":
                 continue
             if not re.search(r":\s*$", l):
                 # if re.search(r"^\s*[\*\+\-] ", l):
                 l = re.sub(r"^\s*[\*\+\-] ", "", l)
-                l = re.sub(r"\(.*", "", l)
+                # l = re.sub(r"\([^)]*\)", "", l)
                 l = re.sub(r"\w+[0-9]\w*", "", l)
                 l = re.sub(r"\w*[0-9]\w+", "", l)
                 l = re.sub(r"\s\s", " ", l)

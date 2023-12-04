@@ -64,14 +64,7 @@ class Action(Module):
             self.printb(f"[orange4]Action[/]: {self.action}")
             self.printb()
             self.action_permissible()
-        elif self.state == Action_States.AFTER_PERMISSIBLE:
-            self.printb()
-            self.printb(f"[orange4]Action[/]: {self.action}")
-            self.printb(f"[orange4]Permissibility[/]: {self.permissible}")
-            self.printb()
-            self.printb(
-                "[deep_sky_blue4]Does this statement make sense? [KEEP/(reg)enerate][/]"
-            )
+            self.generate_consequences()
         elif self.state == Action_States.AFTER_CONSEQUENCES:
             self.printb()
             self.printb(f"[orange4]Action[/]: {self.action}")
@@ -86,7 +79,10 @@ class Action(Module):
             self.printb(f"[orange4]Action[/]: {self.action}")
             self.printb(f"[orange4]Permissibility[/]: {self.permissible}")
             self.printb(f"[orange4]Consequences[/]: {self.consequences}")
-            self.printb(f"[orange4]New description[/]: {self.new_description}")
+            if self.skip_description:
+                self.printb("[orange4]New description[/]: [i]skipped[/i]")
+            else:
+                self.printb(f"[orange4]New description[/]: {self.new_description}")
             self.printb()
             self.printb(
                 "[deep_sky_blue4]Would you like to keep the new description? [KEEP/(reg)enerate/(s)kip/keep and skip to (e)nd][/]"
@@ -97,7 +93,7 @@ class Action(Module):
             self.printb(f"[orange4]Permissibility[/]: {self.permissible}")
             self.printb(f"[orange4]Consequences[/]: {self.consequences}")
             if self.skip_description:
-                self.printb("[orange4]New description[/]: [skipped]")
+                self.printb("[orange4]New description[/]: [i]skipped[/i]")
             else:
                 self.printb(f"[orange4]New description[/]: {self.new_description}")
             self.print_inventory()
@@ -107,17 +103,12 @@ class Action(Module):
             )
 
     def on_input(self, line):
-        if self.state == Action_States.AFTER_PERMISSIBLE:
+        if self.state == Action_States.AFTER_CONSEQUENCES:
             if line == "reg" or line == "regenerate":
                 self.state = Action_States.BEGIN
                 self.action_permissible()
-            else:
                 self.generate_consequences()
 
-        elif self.state == Action_States.AFTER_CONSEQUENCES:
-            if line == "reg" or line == "regenerate":
-                self.state = Action_States.AFTER_PERMISSIBLE
-                self.generate_consequences()
             elif line == "i" or line == "inv" or line == "inventory":
                 self.state = Action_States.AFTER_UPDATED_DESCRIPTION
                 self.skip_description = True
@@ -190,12 +181,7 @@ class Action(Module):
         )
 
         self.permissible = out
-        self.state = Action_States.AFTER_PERMISSIBLE
-
         self.printb()
-        self.printb(
-            "[deep_sky_blue4]Does this statement make sense? [KEEP/(reg)enerate][/]"
-        )
 
     def generate_consequences(self):
         out = self.gstate.llm.consequences(
