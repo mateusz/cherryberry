@@ -1,6 +1,6 @@
 ### Instruction:
 
-From supplied location description, activity and permissibility, generate consequences.
+From supplied location description, and permissibility, generate consequences of your activity.
 
 Location description: {{description}}
 

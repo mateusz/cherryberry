@@ -1,6 +1,6 @@
 ### Instruction:
 
-Given the description of the location and the list of the items in the character's pack, decide if the action player wishes to take makes sense.
+Given the description of the location and the list of the items in the player's pack, decide if the action player wishes to take makes sense.
 
 Location description: {{description}}
 

@@ -20,4 +20,4 @@ Activity: {{consequences}}
 
 ### Response: 
 
-Edited and expanded description (add at most one sentence, rewording is fine): 
+Edited and expanded description (add at most one paragraph, rewording is fine): 

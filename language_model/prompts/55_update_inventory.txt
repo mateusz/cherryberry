@@ -1,6 +1,6 @@
 ### Instruction:
 
-Apply the provided list of updates to the list of items the character has in their pack. Make sure to apply every update, and to not lose items.
+Apply the provided list of updates to the list of items the player has in their pack. Make sure to apply every update, and to not lose items.
 
 Items currently in the pack:
 
