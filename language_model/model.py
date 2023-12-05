@@ -173,10 +173,10 @@ class Model:
         self.printb()
         return out.strip()
 
-    def add_description(self, description, action, consequences):
-        self.printb("[grey46][Generating add description...][/]")
+    def update_description(self, description, action, consequences):
+        self.printb("[grey46][Generating update description...][/]")
 
-        prompt = self.tmpl.get_template("40_add_description.txt").render(
+        prompt = self.tmpl.get_template("40_update_description.txt").render(
             {
                 "description": description,
                 "action": action,
@@ -186,7 +186,7 @@ class Model:
         stream = self.llm.create_completion(
             prompt=prompt,
             max_tokens=2048,
-            temperature=0.8,
+            temperature=1.2,
             repeat_penalty=1.1,
             top_p=0.95,
             top_k=40,

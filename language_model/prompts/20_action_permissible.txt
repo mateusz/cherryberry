@@ -1,17 +1,15 @@
 ### Instruction:
 
-Given the description of the location and the JSON inventory of the character, decide if the action player wishes to take is permissible.
+Given the description of the location and the list of the items in the character's pack, decide if the action player wishes to take makes sense.
 
 Location description: {{description}}
 
-Inventory:
+Items in the pack:
 
-```json
 {{inventory}}
-```
 
 Action player wishes to take: {{action}}
 
 ### Response: 
 
-Decide if the action is permissible in one sentence: 
+Decide if the action makes sense in one sentence: 

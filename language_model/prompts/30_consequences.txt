@@ -1,19 +1,13 @@
 ### Instruction:
 
-From supplied JSON inventory and the description of the location, generate consequences of your action. Take permissibility into account.
+From supplied location description, activity and permissibility, generate consequences.
 
-Inventory:
+Location description: {{description}}
 
-```json
-{{inventory}}
-```
-
-Description: {{description}}
-
-Your action: {{action}}
+Your activity: {{action}}
 
 Permissibility: {{permissibility}}
 
 ### Response: 
 
-One sentence describing the consequences of your action: 
+One sentence describing the consequences of your activity: 

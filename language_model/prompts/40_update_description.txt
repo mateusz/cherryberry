@@ -1,0 +1,23 @@
+### Instruction:
+
+Edit and expand the supplied location description for an text adventure game like Zork to show how it changed because of the activity. Make sure to represent the permanent changes appropriately, but avoid describing temporary changes.
+
+Do not use word "you", write in the third person perspective and avoid adjectives. Describe the surroundings, but not the events. 
+
+Example:
+
+Location description: A room in a little house
+
+Activity: someone ran through the room, leaving dirty footprints.
+
+Edited and expanded description: A room in little house, with dirty footprints on the floor.
+
+Now your turn:
+
+Location description: {{description}}
+
+Activity: {{consequences}}
+
+### Response: 
+
+Edited and expanded description (add at most one sentence, rewording is fine): 

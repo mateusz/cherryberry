@@ -1,8 +1,8 @@
 ### Instruction:
 
-Apply the provided list of updates to the supplied current inventory. Make sure to apply every update, and to not lose items.
+Apply the provided list of updates to the list of items the character has in their pack. Make sure to apply every update, and to not lose items.
 
-Current inventory:
+Items currently in the pack:
 
 {{inventory}}
 
@@ -12,6 +12,6 @@ Updates to apply:
 
 ### Response: 
 
-Updated inventory:
+The pack now contains:
 
 *

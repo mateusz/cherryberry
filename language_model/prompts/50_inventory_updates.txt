@@ -1,8 +1,8 @@
 ### Instruction:
 
-From supplied current inventory of the character, generate a list of updates that need to be done as a result of the activity. Items may need to be added, removed or edited.
+From supplied list of items the character has in their pack, generate a list of updates that need to be done as a result of the activity. Items may need to be added or removed from the pack, or may need to beedited.
 
-Current inventory:
+Items in the pack:
 
 {{inventory}}
 
@@ -10,6 +10,6 @@ Activity: {{consequences}}
 
 ### Response: 
 
-List of required updates, reason step by step:
+List of required updates to the items in the pack, reason step by step:
 
 1.

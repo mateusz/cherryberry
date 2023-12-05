@@ -200,12 +200,11 @@ class Action(Module):
         )
 
     def update_description(self):
-        self.printb(self.location_description)
-        out = self.gstate.llm.add_description(
+        out = self.gstate.llm.update_description(
             self.location_description, self.action, self.consequences
         )
 
-        self.new_description = self.location_description + "\n\n" + out
+        self.new_description = out
         self.state = Action_States.AFTER_UPDATED_DESCRIPTION
 
         self.printb()
