@@ -18,10 +18,11 @@ import logging
 # unimportant: grey46
 
 # TODO:
-# - remove permissibility approval
 # - add location titles to prompts
 # - inventory, keep things in the brackets, maybe replace brackets
 # - allow option of complete location rewrite
+# - redo actions using items - specify which items are to be used
+# - maybe also list explicit items for picking up
 
 
 class GState:

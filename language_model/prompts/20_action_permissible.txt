@@ -12,4 +12,4 @@ Action player wishes to take: {{action}}
 
 ### Response: 
 
-Decide if the action makes sense in one sentence: 
+Decide if the action makes sense: 

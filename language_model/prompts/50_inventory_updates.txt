@@ -2,6 +2,8 @@
 
 From supplied list of items the player has in their pack, generate a list of updates that need to be done as a result of the activity. Items may need to be added or removed from the pack, or may need to be edited.
 
+Do not make items up, you can only work provided items and the activity. Keep the response factual.
+
 Items in the pack:
 
 {{inventory}}
@@ -10,6 +12,4 @@ Activity: {{consequences}}
 
 ### Response: 
 
-List of required updates to the items in the pack, reason step by step:
-
-1.
+List of required updates to the items in the pack, reason step by step: 

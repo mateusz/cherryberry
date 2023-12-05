@@ -230,8 +230,7 @@ class Model:
             stop=[],
             stream=True,
         )
-        out = "1. "
-        self.printg(out)
+        out = ""
         for output in stream:
             out += output["choices"][0]["text"]
             self.printg(output["choices"][0]["text"], end="", flush=True)
