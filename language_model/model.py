@@ -102,17 +102,17 @@ class Model:
         self.printb()
         return out.strip()
 
-    def action_permissible(self, description, inventory, action):
-        self.printb("[grey46][Generating permissible statement...][/]")
+    def action_items(self, description, inventory, action):
+        self.printb("[grey46][Generating action items...][/]")
 
         if len(inventory) == 0:
-            i = "* INVENTORY IS EMPTY"
+            i = "* EMPTY\n"
         else:
             i = ""
             for k in inventory:
-                i += f"* {k}"
+                i += f"* {k}\n"
 
-        prompt = self.tmpl.get_template("20_action_permissible.txt").render(
+        prompt = self.tmpl.get_template("20_action_items.txt").render(
             {
                 "description": description,
                 "inventory": i,
@@ -133,32 +133,46 @@ class Model:
         for output in stream:
             out += output["choices"][0]["text"]
             self.printg(output["choices"][0]["text"], end="", flush=True)
-
         self.clearg()
-        return out.strip()
 
-    def consequences(self, description, inventory, action, permissible):
+        items = []
+        lines = re.split(r"[\n\*]", out.strip())
+        for l in lines:
+            if l.strip() == "":
+                continue
+            if not re.search(r":\s*$", l):
+                # if re.search(r"^\s*[\*\+\-] ", l):
+                l = re.sub(r"^\s*[\*\+\-] ", "", l)
+                l = re.sub(r"\([^)]*\)", "", l)
+                l = re.sub(r"\w+[0-9]\w*", "", l)
+                l = re.sub(r"\w*[0-9]\w+", "", l)
+                l = re.sub(r"\s\s", " ", l)
+
+                items += [l.strip().lower()]
+
+        return items
+
+    def consequences(self, description, inventory, action):
         self.printb("[grey46][Generating consequences...][/]")
 
         if len(inventory) == 0:
-            i = "* INVENTORY IS EMPTY"
+            i = "* EMPTY\n"
         else:
             i = ""
             for k in inventory:
-                i += f"* {k}"
+                i += f"* {k}\n"
 
         prompt = self.tmpl.get_template("30_consequences.txt").render(
             {
                 "description": description,
                 "inventory": i,
                 "action": action,
-                "permissible": permissible,
             }
         )
         stream = self.llm.create_completion(
             prompt=prompt,
             max_tokens=2048,
-            temperature=0.6,
+            temperature=1.2,
             repeat_penalty=1.1,
             top_p=0.95,
             top_k=40,
@@ -206,11 +220,11 @@ class Model:
         self.printb("[grey46][Generating inventory updates][/]")
 
         if len(inventory) == 0:
-            i = "* INVENTORY IS EMPTY"
+            i = "* EMPTY\n"
         else:
             i = ""
             for k in inventory:
-                i += f"* {k}"
+                i += f"* {k}\n"
 
         prompt = self.tmpl.get_template("50_inventory_updates.txt").render(
             {
@@ -272,17 +286,17 @@ class Model:
             if not re.search(r":\s*$", l):
                 # if re.search(r"^\s*[\*\+\-] ", l):
                 l = re.sub(r"^\s*[\*\+\-] ", "", l)
-                # l = re.sub(r"\([^)]*\)", "", l)
+                l = re.sub(r"\([^)]*\)", "", l)
                 l = re.sub(r"\w+[0-9]\w*", "", l)
                 l = re.sub(r"\w*[0-9]\w+", "", l)
                 l = re.sub(r"\s\s", " ", l)
 
-                items += [l.strip()]
+                items += [l.strip().lower()]
 
         return items
 
     def find_exits(self, location_description):
-        self.printg("[grey46][Generating find exits...][/]")
+        self.printb("[grey46][Generating find exits...][/]")
 
         prompt = self.tmpl.get_template("10_find_exits.txt").render(
             {"description": location_description}

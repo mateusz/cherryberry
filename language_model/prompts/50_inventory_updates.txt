@@ -1,15 +1,62 @@
+# System prompt:
+
+From supplied list of items you have in your pack, generate a list of updates that need to be done as a result of the activity. Items may need to be added or removed from the pack, or may need to be edited.
+
+Do not make items up, you can only work provided items and the activity. Keep the response factual. Do not add status effects. Work only with things.
+
 ### Instruction:
 
-From supplied list of items the player has in their pack, generate a list of updates that need to be done as a result of the activity. Items may need to be added or removed from the pack, or may need to be edited.
+Items currently in your pack:
 
-Do not make items up, you can only work provided items and the activity. Keep the response factual.
+* Flour
+* Water
 
-Items in the pack:
-
-{{inventory}}
-
-Activity: {{consequences}}
+Activity: You make bread from flour and yeast.
 
 ### Response: 
 
-List of required updates to the items in the pack, reason step by step: 
+List of required updates to the items in your pack, reason step by step: 
+
+1. Flour and water need to be removed as they are combined to make dough.
+2. Dough needs to be added as it has just been created.
+
+### Instruction:
+
+Items currently in your pack:
+
+* EMPTY
+
+Activity: Pick some flowers.
+
+### Response: 
+
+List of required updates to the items in your pack, reason step by step: 
+
+1. Flowers need to be added to the pack as they have just been picked.
+
+### Instruction:
+
+Items currently in your pack:
+
+* Colourful marbles
+
+Activity: Drop the marbles on the floor creating a slippery trap.
+
+### Response: 
+
+List of required updates to the items in your pack, reason step by step: 
+
+1. Marbles need to be removed as they have just been dropped on the floor.
+
+### Instruction:
+
+Items currently in your pack:
+
+{{inventory}}
+Activity: {{action}} {{consequences}}
+
+### Response: 
+
+List of required updates to the items in your pack, reason step by step: 
+
+1. 

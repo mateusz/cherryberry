@@ -4,4 +4,5 @@ from .delete_module import DeleteModule
 from .connect_location import ConnectLocation
 from .update_location_description import UpdateLocationDescription
 from .update_inventory import UpdateInventory
-from .textual import GenerateUpdated, BufferUpdated, GenerateCleared, Stopped
+from .textual import GenerateUpdated, BufferUpdated, GenerateCleared, Stopped, SaveState
+from .add_history import AddHistory

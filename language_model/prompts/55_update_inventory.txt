@@ -1,10 +1,69 @@
+# System prompt:
+
+The list of items in your pack is changing due to the activity as described. Apply the provided list of updates making sure to apply every update, to not lose items, and to add newly acquired or created items.
+
 ### Instruction:
 
-Apply the provided list of updates to the list of items the player has in their pack. Make sure to apply every update, and to not lose items.
+Items currently in your pack:
 
-Items currently in the pack:
+* Flour
+* Water
+
+Activity: You make bread from flour and yeast.
+
+Updates to apply:
+
+1. Flour and water are combined to make dough, so they both need to be removed.
+2. Dough has just been created and needs to be added to the inventory.
+
+### Response: 
+
+Your pack now contains:
+
+* Dough
+
+### Instruction:
+
+Items currently in your pack:
+
+* EMPTY
+
+Activity: Pick some flowers.
+
+Updates to apply:
+
+1. Flowers need to be added to the pack as they have just been picked.
+
+### Response: 
+
+Your pack now contains:
+
+* Flowers
+
+### Instruction:
+
+Items currently in your pack:
+
+* Colourful marbles
+
+Activity: You drop the marbles on the floor creating a slippery trap.
+
+Updates to apply:
+
+1. Marbles need to be removed as they have just been dropped on the floor.
+
+### Response: 
+
+Your pack now contains:
+
+* EMPTY
+
+### Instruction:
+
+Items currently in your pack:
 
 {{inventory}}
+Activity: {{action}} {{consequences}}
 
 Updates to apply:
 
@@ -12,6 +71,6 @@ Updates to apply:
 
 ### Response: 
 
-The pack now contains:
+Your pack now contains:
 
 *

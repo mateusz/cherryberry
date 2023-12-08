@@ -1,7 +1,7 @@
 from enum import Enum
 import json
 import hashlib
-from events import AddModule, ActivateModule, DeleteModule, ConnectLocation
+from events import AddModule, ActivateModule, DeleteModule, ConnectLocation, AddHistory
 from .action import Action
 import shlex
 import re
@@ -22,7 +22,7 @@ class Location(Module):
 
     help_text = """\
 [u]Commands:[/]
-[orange4]a "<action>"[/] - Perform action (switches to action generator)
+[orange4]I "<action>"[/] - Perform action (switches to action generator). Write in the first person (that's why command is called I)
 [orange4]g,go <num>[/] - Go through the numbered exit (possibly switches to location generator))
 [orange4]gn,gon,gonew "<name>" "<description>"[/] - Go to a new location (switches to location generator)
 [orange4]gd,god,godel <num>[/] - Delete numbered exit
@@ -68,15 +68,17 @@ class Location(Module):
             key = list(self.exits.keys())[exit_number]
             ex = list(self.exits.values())[exit_number]
             self.printb()
-            self.printb(f"[italic green4]Taking the exit '{ex.get('name')}'[/]")
+            self.printb()
 
             if ex.get("id", None):
                 return [
+                    AddHistory(f"You go towards the {ex.get('name')}"),
                     ActivateModule(ex.get("id")),
                 ]
             else:
                 l = LocationGenerator.create_from_exit(self, ex)
                 return [
+                    AddHistory(f"You go towards the {ex.get('name')}"),
                     AddModule(l),
                     ActivateModule(l.id),
                 ]
@@ -116,7 +118,7 @@ class Location(Module):
                     return [
                         DeleteModule(ex.get("id")),
                     ]
-        elif cmd[0] == "act" or cmd[0] == "a":
+        elif cmd[0] == "I":
             l = Action.create(self.gstate, self.queue, self, cmd[1])
             return [
                 AddModule(l),

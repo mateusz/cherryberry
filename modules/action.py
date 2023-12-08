@@ -5,8 +5,10 @@ from events import (
     DeleteModule,
     UpdateLocationDescription,
     UpdateInventory,
+    AddHistory,
 )
 import shlex
+import re
 
 
 class Action_States(Enum):
@@ -24,16 +26,21 @@ class Action(Module):
     location_description: str
     location_id: str
     action: str
-    permissible: str
+    action_items: list
     consequences: str
     new_description: str
-    new_inventory: str
+    new_inventory: list
     skip_description: bool
     skip_inventory: bool
     state: Action_States
 
     @staticmethod
     def create(gstate, queue, location, action):
+        action = action.strip()
+        action = re.sub("^I ", "", action)
+        action = re.sub("\.$", "", action)
+        action = f"You {action}."
+
         a = Action(
             gstate,
             queue,
@@ -43,7 +50,7 @@ class Action(Module):
                 "location_description": location.description.strip(),
                 "location_id": location.id,
                 "action": action,
-                "permissible": "",
+                "action_items": [],
                 "consequences": "",
                 "new_description": "",
                 "new_inventory": "",
@@ -63,12 +70,12 @@ class Action(Module):
             self.printb()
             self.printb(f"[orange4]Action[/]: {self.action}")
             self.printb()
-            self.action_permissible()
+            self.get_action_items()
             self.generate_consequences()
         elif self.state == Action_States.AFTER_CONSEQUENCES:
             self.printb()
             self.printb(f"[orange4]Action[/]: {self.action}")
-            self.printb(f"[orange4]Permissibility[/]: {self.permissible}")
+            self.print_action_items()
             self.printb(f"[orange4]Consequences[/]: {self.consequences}")
             self.printb()
             self.printb(
@@ -77,7 +84,7 @@ class Action(Module):
         elif self.state == Action_States.AFTER_UPDATED_DESCRIPTION:
             self.printb()
             self.printb(f"[orange4]Action[/]: {self.action}")
-            self.printb(f"[orange4]Permissibility[/]: {self.permissible}")
+            self.print_action_items()
             self.printb(f"[orange4]Consequences[/]: {self.consequences}")
             if self.skip_description:
                 self.printb("[orange4]New description[/]: [i]skipped[/i]")
@@ -90,7 +97,7 @@ class Action(Module):
         elif self.state == Action_States.AFTER_UPDATED_INVENTORY:
             self.printb()
             self.printb(f"[orange4]Action[/]: {self.action}")
-            self.printb(f"[orange4]Permissibility[/]: {self.permissible}")
+            self.print_action_items()
             self.printb(f"[orange4]Consequences[/]: {self.consequences}")
             if self.skip_description:
                 self.printb("[orange4]New description[/]: [i]skipped[/i]")
@@ -106,7 +113,7 @@ class Action(Module):
         if self.state == Action_States.AFTER_CONSEQUENCES:
             if line == "reg" or line == "regenerate":
                 self.state = Action_States.BEGIN
-                self.action_permissible()
+                self.get_action_items()
                 self.generate_consequences()
 
             elif line == "i" or line == "inv" or line == "inventory":
@@ -175,20 +182,19 @@ class Action(Module):
             else:
                 self.printb("[deep_sky_blue4]Command not recognised[/deep_sky_blue4]")
 
-    def action_permissible(self):
-        out = self.gstate.llm.action_permissible(
+    def get_action_items(self):
+        out = self.gstate.llm.action_items(
             self.location_description, self.gstate.inventory, self.action
         )
 
-        self.permissible = out
-        self.printb()
+        self.action_items = out
+        self.print_action_items()
 
     def generate_consequences(self):
         out = self.gstate.llm.consequences(
             self.location_description,
-            self.gstate.inventory,
+            self.action_items,
             self.action,
-            self.permissible,
         )
 
         self.consequences = out
@@ -215,14 +221,37 @@ class Action(Module):
     def update_inventory(self):
         self.new_inventory = self.gstate.inventory.copy()
         try:
-            self.new_inventory = self.gstate.llm.update_inventory(
-                self.gstate.inventory,
+            new_action_items = self.gstate.llm.update_inventory(
+                self.action_items,
                 self.location_description,
                 self.action,
                 self.consequences,
             )
 
+            for n in new_action_items:
+                if n.strip().lower() == "empty" or n.strip().lower() == "none":
+                    new_action_items = []
+                    break
+
+            # Replace used items
+            merged = []
+            for i in self.gstate.inventory:
+                found_in_action = False
+                for a in self.action_items:
+                    if a.lower().strip() == i.lower().strip():
+                        found_in_action = True
+                        break
+
+                if not found_in_action:
+                    merged += [i]
+
+            for n in new_action_items:
+                merged += [n]
+
+            self.new_inventory = merged
+
         except Exception as e:
+            self.printb(str(e))
             self.printb("[deep_sky_blue4][No changes found][/]")
             self.new_inventory = self.gstate.inventory.copy()
 
@@ -233,6 +262,16 @@ class Action(Module):
         self.printb(
             "[deep_sky_blue4]Does the updated inventory make sense? [KEEP/(reg)enerate/(s)kip/(d)elete N/(a)dd 'item' 'description'][/]"
         )
+
+    def print_action_items(self):
+        if len(self.action_items) == 0:
+            self.printb("[orange4]Action items[/]: empty")
+        else:
+            self.printb("[orange4]Action items[/]:")
+            i = 0
+            for k in self.action_items:
+                i += 1
+                self.printb(f"({i}) {k}")
 
     def print_inventory(self):
         if self.skip_inventory:
@@ -248,6 +287,8 @@ class Action(Module):
 
     def finalize(self):
         events = [
+            AddHistory(self.action),
+            AddHistory(self.consequences),
             DeleteModule(self.id),
         ]
 

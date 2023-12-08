@@ -21,3 +21,18 @@ class GenerateCleared(Message):
 class Stopped(Message):
     def __init__(self) -> None:
         super().__init__()
+
+
+class SaveState(Message):
+    def __init__(
+        self,
+        all_modules,
+        current_module,
+        inventory,
+        history,
+    ) -> None:
+        self.all_modules = (all_modules,)
+        self.current_module = (current_module,)
+        self.inventory = (inventory,)
+        self.history = (history,)
+        super().__init__()

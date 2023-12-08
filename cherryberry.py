@@ -3,6 +3,7 @@ import os
 import logging
 import io
 import sys
+import json
 
 from game import Game, WrappyLog
 from textual import work, events
@@ -13,7 +14,7 @@ from textual.logging import TextualHandler
 import queue
 from textual.message import Message
 from textwrap import wrap
-from events import BufferUpdated, GenerateUpdated, GenerateCleared, Stopped
+from events import BufferUpdated, GenerateUpdated, GenerateCleared, Stopped, SaveState
 
 logging.basicConfig(
     level="DEBUG",

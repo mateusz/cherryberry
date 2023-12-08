@@ -1,12 +1,14 @@
 ### Instruction:
 
-From supplied location description, and permissibility, generate consequences of your activity.
+From supplied location description, generate consequences of your activity which used the items listed.
 
 Location description: {{description}}
 
 Your activity: {{action}}
 
-Permissibility: {{permissibility}}
+Items used:
+
+{{inventory}}
 
 ### Response: 
 

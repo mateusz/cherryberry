@@ -1,23 +1,46 @@
-### Instruction:
+### System prompt:
 
-Edit and expand the supplied location description for an text adventure game like Zork to show how it changed because of the activity. Make sure to represent the permanent changes appropriately, but avoid describing temporary changes.
+Reword the supplied location description for an text adventure game like Zork to show how it changed because of the activity. Make sure to represent the permanent changes appropriately, but avoid describing temporary changes.
 
 Do not use word "you", write in the third person perspective and avoid adjectives. Describe the surroundings, but not the events. 
 
-Example:
+Make sure paragraphs are at most three sentences long.
+
+### Instruction:
 
 Location description: A room in a little house
 
-Activity: someone ran through the room, leaving dirty footprints.
-
-Edited and expanded description: A room in little house, with dirty footprints on the floor.
-
-Now your turn:
-
-Location description: {{description}}
-
-Activity: {{consequences}}
+Activity: run through the room - You run through the room, leaving dirty footprints behind.
 
 ### Response: 
 
-Edited and expanded description (add at most one paragraph, rewording is fine): 
+Updated description (reword or add one sentence):
+
+A room in little house.
+
+There is dirty footprints on the floor.
+
+### Instruction:
+
+Location description: The top of the mountain has stunning views. The wind blows hard though, making it hard to stand straight. On one side the surface drops off in a sheer cliff, a meadow can be seen a thousand meters below.
+
+Activity: You build a little altar out of stones and flowers. You collect some stones and place them in a neat pile, decorating it with flowers. You declare it's an altar to a nature goddess.
+
+### Response: 
+
+Updated description (reword or add one sentence):
+
+The top of the mountain has stunning views. The wind blows hard though, making it hard to stand straight. On one side the surface drops off in a sheer cliff, a meadow can be seen a thousand meters below.
+
+There is a small pile of stones here, decorated with flowers, it's purpose unknown.
+
+### Instruction:
+
+Location description: {{description}}
+
+Activity: {{action}} {{consequences}}
+
+### Response: 
+
+Updated description (reword or add one sentence): 
+
