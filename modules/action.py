@@ -282,6 +282,8 @@ class Action(Module):
                 self.printb(f"({i}) {k}")
 
     def finalize(self):
+        self.printb(f"[italic green4]{self.consequences}[/]")
+
         events = [
             AddHistory(self.consequences),
             DeleteModule(self.id),

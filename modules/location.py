@@ -52,6 +52,7 @@ class Location(Module):
 
     def on_activate(self):
         self.describe()
+        return [AddHistory(self.description, skip_if_duplicate=True)]
 
     def on_input(self, line):
         cmd = shlex.split(line)
@@ -70,15 +71,17 @@ class Location(Module):
             self.printb()
             self.printb()
 
+            msg = f"You go towards the {ex.get('name')}"
+            self.printb(f"[italic green4]{msg}[/]")
             if ex.get("id", None):
                 return [
-                    AddHistory(f"You go towards the {ex.get('name')}"),
+                    AddHistory(msg),
                     ActivateModule(ex.get("id")),
                 ]
             else:
                 l = LocationGenerator.create_from_exit(self, ex)
                 return [
-                    AddHistory(f"You go towards the {ex.get('name')}"),
+                    AddHistory(msg),
                     AddModule(l),
                     ActivateModule(l.id),
                 ]

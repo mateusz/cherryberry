@@ -84,7 +84,7 @@ class Game:
 
             self.events += [ActivateModule(game_config.get("current_module"))]
         else:
-            self.gstate.history = ["The game has just begun!"]
+            self.gstate.history = []
             lg = LocationGenerator.create_from_user_input(
                 self.gstate, self.queue, "Adventure awaits!"
             )
@@ -132,7 +132,15 @@ class Game:
                 event = e.event.strip()
                 if event == "":
                     continue
-                self.printb(f"[italic green4]{event}[/]")
+
+                skip = False
+                if e.skip_if_duplicate:
+                    for h in self.gstate.history:
+                        if event == h:
+                            skip = True
+                            break
+                if skip:
+                    continue
 
                 self.gstate.history += [event]
                 for m in self.all_modules.values():

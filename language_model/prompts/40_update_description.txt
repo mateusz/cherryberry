@@ -14,7 +14,7 @@ Activity: You run through the room, leaving dirty footprints behind.
 
 ### Response: 
 
-Updated description (reword or add one sentence):
+Updated description (paragraphs no longer than three sentences):
 
 A room in little house.
 
@@ -28,7 +28,7 @@ Activity: You collect some stones and place them in a neat pile, decorating it w
 
 ### Response: 
 
-Updated description (reword or add one sentence):
+Updated description (paragraphs no longer than three sentences):
 
 The top of the mountain has stunning views. The wind blows hard though, making it hard to stand straight. On one side the surface drops off in a sheer cliff, a meadow can be seen a thousand meters below.
 
@@ -42,5 +42,4 @@ Activity: {{consequences}}
 
 ### Response: 
 
-Updated description (reword or add one sentence): 
-
+Updated description (paragraphs no longer than three sentences):
