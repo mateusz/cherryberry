@@ -1,5 +1,5 @@
 from enum import Enum
-import json
+import orjson
 import hashlib
 from events import AddModule, ActivateModule, DeleteModule, ConnectLocation, AddHistory
 from .action import Action
@@ -22,7 +22,7 @@ class Location(Module):
 
     help_text = """\
 [u]Commands:[/]
-[orange4]I "<action>"[/] - Perform action (switches to action generator). Write in the first person (that's why command is called I)
+[orange4]I <action>[/] - Perform action (switches to action generator). Write in the first person (that's why command is called I)
 [orange4]g,go <num>[/] - Go through the numbered exit (possibly switches to location generator))
 [orange4]gn,gon,gonew "<name>" "<description>"[/] - Go to a new location (switches to location generator)
 [orange4]gd,god,godel <num>[/] - Delete numbered exit
@@ -119,7 +119,7 @@ class Location(Module):
                         DeleteModule(ex.get("id")),
                     ]
         elif cmd[0] == "I":
-            l = Action.create(self.gstate, self.queue, self, cmd[1])
+            l = Action.create(self.gstate, self.queue, self, " ".join(cmd))
             return [
                 AddModule(l),
                 ActivateModule(l.id),
@@ -297,11 +297,12 @@ class LocationGenerator(Module):
         self.printb()
         if self.requirements:
             out = self.gstate.llm.generate_location(
-                self.gstate.setting, self.requirements
+                self.gstate.setting, self.gstate.history, self.requirements
             )
         else:
             out = self.gstate.llm.generate_location_from_exit(
                 self.gstate.setting,
+                self.gstate.history,
                 self.from_previous_description,
                 self.from_exit.get("name"),
                 self.from_exit.get("description"),

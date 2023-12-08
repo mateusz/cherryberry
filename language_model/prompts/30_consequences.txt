@@ -1,6 +1,10 @@
 ### Instruction:
 
-From supplied location description, generate consequences of your activity which used the items listed.
+From supplied location description, generate consequences of your activity which used the items listed. If you want you may take the player recent history into account.
+
+The story so far:
+
+{{history}}
 
 Location description: {{description}}
 

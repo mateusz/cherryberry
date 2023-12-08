@@ -66,10 +66,11 @@ Location description: {{description}}
 Items in the pack:
 
 {{inventory}}
+
 Action player wishes to take: {{action}}
 
 ### Response: 
 
 Items to use in this action:
 
-*
+* 

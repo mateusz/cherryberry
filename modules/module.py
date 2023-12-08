@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-import json
+import orjson
 from queue import Queue
 from events import BufferUpdated, GenerateUpdated, GenerateCleared
 
@@ -57,4 +57,4 @@ class Module(ABC):
 
         d = self.extra_json(d)
 
-        return json.dumps(d, indent=4)
+        return orjson.dumps(d, option=orjson.OPT_INDENT_2)

@@ -2,7 +2,11 @@
 
 Generate a new location description for an text adventure game like Zork. {{setting}}
 
-Use supplied requirements. Do not use word "you", write in the third person perspective and avoid adjectives. Describe the surroundings, provide some items to interact with, and possibly add an NPC character.
+Use supplied requirements. Do not use word "you", write in the third person perspective and avoid adjectives. Describe the surroundings, provide some items to interact with, and possibly add an NPC character. If you want you may take the player recent history into account.
+
+The story so far, for context only:
+
+{{history}}
 
 Requirements: {{requirements}}
 

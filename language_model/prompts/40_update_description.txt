@@ -10,7 +10,7 @@ Make sure paragraphs are at most three sentences long.
 
 Location description: A room in a little house
 
-Activity: run through the room - You run through the room, leaving dirty footprints behind.
+Activity: You run through the room, leaving dirty footprints behind.
 
 ### Response: 
 
@@ -24,7 +24,7 @@ There is dirty footprints on the floor.
 
 Location description: The top of the mountain has stunning views. The wind blows hard though, making it hard to stand straight. On one side the surface drops off in a sheer cliff, a meadow can be seen a thousand meters below.
 
-Activity: You build a little altar out of stones and flowers. You collect some stones and place them in a neat pile, decorating it with flowers. You declare it's an altar to a nature goddess.
+Activity: You collect some stones and place them in a neat pile, decorating it with flowers. You declare it's an altar to a nature goddess.
 
 ### Response: 
 
@@ -38,7 +38,7 @@ There is a small pile of stones here, decorated with flowers, it's purpose unkno
 
 Location description: {{description}}
 
-Activity: {{action}} {{consequences}}
+Activity: {{consequences}}
 
 ### Response: 
 

@@ -1,7 +1,7 @@
 import os
 from language_model import Model
 from modules import LocationGenerator
-import json
+import orjson
 from pathlib import Path
 from events import AddModule, ActivateModule, ConnectLocation
 from dataclasses import dataclass
@@ -38,7 +38,7 @@ class GState:
         self.setting = "RPG game set in an expansive Canadian frozen wilderness in the aftermath of a geomagnetic disaster. The player is a lone survivor facing off against the nature."
         self.inventory = []
         self.history = []
-        self.llm = Model(queue)
+        self.llm = Model(queue, debug=True)
 
     def copy(self):
         n = GState(self.llm.queue)
@@ -65,7 +65,7 @@ class Game:
         if from_save:
             game_config = {}
             with open("save/game_loop.json", "r", encoding="utf-8") as f:
-                game_config = json.loads(f.read())
+                game_config = orjson.loads(f.read())
                 self.gstate.inventory = game_config.get("inventory")
                 self.gstate.history = game_config.get("history")
                 self.gstate.setting = game_config.get("setting")
@@ -73,7 +73,7 @@ class Game:
             pathlist = Path(from_save).glob("modules/*.json")
             for path in pathlist:
                 with open(path, "r", encoding="utf-8") as f:
-                    c = json.loads(f.read())
+                    c = orjson.loads(f.read())
 
                     modules = __import__("modules")
                     class_name = getattr(modules, c.get("class"))
@@ -84,6 +84,7 @@ class Game:
 
             self.events += [ActivateModule(game_config.get("current_module"))]
         else:
+            self.gstate.history = ["The game has just begun!"]
             lg = LocationGenerator.create_from_user_input(
                 self.gstate, self.queue, "Adventure awaits!"
             )
@@ -128,9 +129,12 @@ class Game:
                 for m in self.all_modules.values():
                     m.set_state(self.gstate)
             elif e.__class__.__name__ == "AddHistory":
-                self.printb(f"[italic green4]{e.event}[/]")
+                event = e.event.strip()
+                if event == "":
+                    continue
+                self.printb(f"[italic green4]{event}[/]")
 
-                self.gstate.history += [e.event]
+                self.gstate.history += [event]
                 for m in self.all_modules.values():
                     m.set_state(self.gstate)
             elif e.__class__.__name__ == "DeleteModule":
@@ -151,18 +155,17 @@ class Game:
 
     def save_state(self):
         for id, module in self.all_modules.items():
-            with open(f"save/modules/{id}.json", "w", encoding="utf-8") as f:
+            with open(f"save/modules/{id}.json", "wb") as f:
                 f.write(module.toJSON())
-        with open("save/game_loop.json", "w", encoding="utf-8") as f:
+        with open("save/game_loop.json", "wb") as f:
             f.write(
-                json.dumps(
+                orjson.dumps(
                     {
                         "current_module": self.current_module.id,
                         "setting": self.gstate.setting,
                         "inventory": self.gstate.inventory,
                         "history": self.gstate.history,
                     },
-                    sort_keys=True,
-                    indent=4,
+                    option=orjson.OPT_INDENT_2,
                 )
             )

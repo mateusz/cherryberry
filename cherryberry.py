@@ -3,7 +3,6 @@ import os
 import logging
 import io
 import sys
-import json
 
 from game import Game, WrappyLog
 from textual import work, events

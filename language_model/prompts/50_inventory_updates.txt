@@ -53,7 +53,8 @@ List of required updates to the items in your pack, reason step by step:
 Items currently in your pack:
 
 {{inventory}}
-Activity: {{action}} {{consequences}}
+
+Activity: {{consequences}}
 
 ### Response: 
 

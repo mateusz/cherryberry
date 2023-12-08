@@ -36,11 +36,6 @@ class Action(Module):
 
     @staticmethod
     def create(gstate, queue, location, action):
-        action = action.strip()
-        action = re.sub("^I ", "", action)
-        action = re.sub("\.$", "", action)
-        action = f"You {action}."
-
         a = Action(
             gstate,
             queue,
@@ -192,6 +187,7 @@ class Action(Module):
 
     def generate_consequences(self):
         out = self.gstate.llm.consequences(
+            self.gstate.history,
             self.location_description,
             self.action_items,
             self.action,
@@ -221,17 +217,17 @@ class Action(Module):
     def update_inventory(self):
         self.new_inventory = self.gstate.inventory.copy()
         try:
-            new_action_items = self.gstate.llm.update_inventory(
+            new_action_items_w_empty = self.gstate.llm.update_inventory(
                 self.action_items,
                 self.location_description,
                 self.action,
                 self.consequences,
             )
 
-            for n in new_action_items:
-                if n.strip().lower() == "empty" or n.strip().lower() == "none":
-                    new_action_items = []
-                    break
+            new_action_items = []
+            for n in new_action_items_w_empty:
+                if n.strip().lower() not in ["empty", "none", "n/a"]:
+                    new_action_items += [n]
 
             # Replace used items
             merged = []
@@ -287,7 +283,6 @@ class Action(Module):
 
     def finalize(self):
         events = [
-            AddHistory(self.action),
             AddHistory(self.consequences),
             DeleteModule(self.id),
         ]

@@ -63,7 +63,8 @@ Your pack now contains:
 Items currently in your pack:
 
 {{inventory}}
-Activity: {{action}} {{consequences}}
+
+Activity: {{consequences}}
 
 Updates to apply:
 
@@ -73,4 +74,4 @@ Updates to apply:
 
 Your pack now contains:
 
-*
+* 
