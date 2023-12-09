@@ -3,6 +3,7 @@ import os
 import logging
 import io
 import sys
+import argparse
 
 from game import Game, WrappyLog
 from textual import work, events
@@ -14,6 +15,7 @@ import queue
 from textual.message import Message
 from textwrap import wrap
 from events import BufferUpdated, GenerateUpdated, GenerateCleared, Stopped, SaveState
+import os.path
 
 logging.basicConfig(
     level="DEBUG",
@@ -29,7 +31,8 @@ class Cherryberry(App):
     generte: str
     line_limit = 4096
 
-    def __init__(self):
+    def __init__(self, args):
+        self.args = args
         super().__init__()
 
     def compose(self) -> ComposeResult:
@@ -122,9 +125,13 @@ class Cherryberry(App):
 
     def execute(self):
         if os.path.exists("save/game_loop.json"):
-            game = Game(self.queue_from_game, from_save="save")
+            game = Game(
+                self.queue_from_game,
+                args=self.args,
+                from_save="save",
+            )
         else:
-            game = Game(self.queue_from_game)
+            game = Game(self.queue_from_game, args=self.args)
 
         while True:
             line = self.queue_to_game.get(block=True)
@@ -136,5 +143,22 @@ class Cherryberry(App):
 
 
 if __name__ == "__main__":
-    app = Cherryberry()
+    parser = argparse.ArgumentParser(
+        prog="Cherryberry",
+    )
+    parser.add_argument("-m", "--model", type=str)
+    parser.add_argument("-ngl", "--gpu-layers", type=int)
+    parser.add_argument("-c", "--n_ctx", type=int)
+    parser.add_argument("--rope_freq_base", type=int)
+    parser.add_argument("--rope_freq_scale", type=int)
+    parser.add_argument("-b", "--n_batch", type=int)
+    parser.add_argument("-t", "--threads", type=int)
+    parser.add_argument("--mlock", action="store_true")
+    parser.add_argument("--debug", action="store_true")
+    args = parser.parse_args()
+
+    if not os.path.isfile(args.model):
+        print("Pass model path as the first parameter")
+
+    app = Cherryberry(args)
     app.run()

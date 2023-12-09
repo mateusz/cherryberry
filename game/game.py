@@ -27,14 +27,15 @@ class GState:
     llm: Model
     history: list
 
-    def __init__(self, queue):
+    def __init__(self, queue, args):
+        self.args = args
         self.setting = "Totally random"
         self.inventory = []
         self.history = []
-        self.llm = Model(queue, debug=True)
+        self.llm = Model(queue, args)
 
     def copy(self):
-        n = GState(self.llm.queue)
+        n = GState(self.llm.queue, self.args)
         n.setting = self.setting
         n.inventory = self.inventory.copy()
         n.history = self.history.copy()
@@ -48,9 +49,9 @@ class Game:
     current_module: str
     events: list
 
-    def __init__(self, queue, from_save=None):
+    def __init__(self, queue, args, from_save=None):
         self.queue = queue
-        self.gstate = GState(queue)
+        self.gstate = GState(queue, args)
         self.all_modules = {}
         self.current_module = None
         self.events = []

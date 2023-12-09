@@ -25,18 +25,19 @@ class Model:
     queue: Queue
     debug: bool
 
-    def __init__(self, queue, debug=False):
+    def __init__(self, queue, args):
         self.queue = queue
+        self.debug = args.debug
+
         self.tmpl = Environment(loader=PackageLoader("language_model", "prompts"))
-        self.debug = debug
         self.llm = Llama(
-            model_path="../models/LLaMA2-13B-Psyfighter2.Q4_K_M.gguf",
-            n_ctx=4096,
-            n_batch=512,
-            rope_freq_scale=1,
-            rope_freq_base=10000,
-            n_gpu_layers=1,
-            n_threads=4,
+            model_path=args.model,
+            n_ctx=args.n_ctx,
+            n_batch=args.n_batch,
+            rope_freq_scale=args.rope_freq_scale,
+            rope_freq_base=args.rope_freq_base,
+            n_gpu_layers=args.gpu_layers,
+            n_threads=args.threads,
             seed=int(time.time()),
         )
         # self.llm.set_cache(LlamaDiskCache('cache'))
