@@ -45,7 +45,18 @@ class Cherryberry(App):
         yield Input(placeholder="Your command, e.g. help")
 
     def on_mount(self) -> None:
-        self.buffer = "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\t\t\t\t[b u]Welcome to CHERRYBERRY, your friendly AI text adventure![/]\n\n\n"
+        self.buffer = "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\t\t\t\t[b u]Welcome to CHERRYBERRY, your friendly AI text adventure![/]\n\n"
+        self.buffer += (
+            "[i]This game is an experiment in using LLMs for text-mode gameplay. "
+        )
+        self.buffer += "It's able to generate locations as you go, as well as process player actions and manage inventory (somewhat). "
+        self.buffer += "The gameplay is limited, so treat it as a demo. "
+        self.buffer += "\n\nThe game is saved frequently into JSON (hence the sluggishness), but it's safe to exit with CTRL-C anytime. "
+        self.buffer += (
+            "If anything goes wrong, CTRL-C, and edit the files in the save directory. "
+        )
+        self.buffer += "\n\nHappy experimenting 😊[/i]\n\n\n"
+
         self.generate = ""
         self.query_one(Input).focus()
         self.executor = self.run_worker(self.execute, thread=True)

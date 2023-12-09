@@ -22,13 +22,15 @@ class Location(Module):
 
     help_text = """\
 [u]Commands:[/]
-[orange4]I <action>[/] - Perform action (switches to action generator). Write in the first person (that's why command is called I)
-[orange4]g,go <num>[/] - Go through the numbered exit (possibly switches to location generator))
-[orange4]gn,gon,gonew "<name>" "<description>"[/] - Go to a new location (switches to location generator)
+[orange4]dark[/] - Switch to dark theme
+[orange4]g,go <num>[/] - Go through the numbered exit (possibly switches to location generator)
+[orange4]gn,gon,gonew "<title>" "<description of transition>"[/] - Go to a new location (switches to location generator)
 [orange4]gd,god,godel <num>[/] - Delete numbered exit
 [orange4]h,help[/] - This text
 [orange4]i,inv,inventory[/] - Show inventory
+[orange4]I <action>[/] - Perform action (switches to action generator). Write in the first person (that's why command is called I)
 [orange4]l,look[/] - Repeat location description
+[orange4]light[/] - Switch to light theme
 """
 
     @staticmethod
@@ -258,7 +260,7 @@ class LocationGenerator(Module):
     def on_activate(self):
         if self.state == LocationGenerator_States.GET_REQUIREMENTS:
             self.printb(
-                "[deep_sky_blue4]Provide a short description of the location you wish to start at, or ENTER for 'abandoned house':[/]"
+                "[deep_sky_blue4]Provide requirements for the location (these will drive generation):[/]"
             )
         elif self.state == LocationGenerator_States.AFTER_REQUIREMENTS:
             self.generate_description_from_requirements()
@@ -271,8 +273,11 @@ class LocationGenerator(Module):
 
     def on_input(self, line):
         if self.state == LocationGenerator_States.GET_REQUIREMENTS:
-            if line != "":
-                self.requirements = line
+            if line == "":
+                return
+            self.requirements = line
+            self.printb(line)
+            self.printb()
             self.generate_description_from_requirements()
         elif self.state == LocationGenerator_States.AFTER_DESCRIPTION:
             if line == "reg" or line == "regenerate":
@@ -287,7 +292,7 @@ class LocationGenerator(Module):
                 self.state = LocationGenerator_States.GET_REQUIREMENTS
                 self.printb()
                 self.printb(
-                    "Provide short description of the location, or ENTER for default:"
+                    "[deep_sky_blue4]Provide requirements for the location (these will drive generation):[/]"
                 )
             elif line == "" or line == "keep":
                 events = [

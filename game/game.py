@@ -1,6 +1,6 @@
 import os
 from language_model import Model
-from modules import LocationGenerator
+from modules import LocationGenerator, GameInit
 import orjson
 from pathlib import Path
 from events import AddModule, ActivateModule, ConnectLocation
@@ -10,6 +10,7 @@ from textual.app import App
 from queue import Queue
 import logging
 from events import BufferUpdated, GenerateUpdated, GenerateCleared, SaveState
+from pathlib import Path
 
 # Style:
 # title: bold deep_pink3
@@ -17,13 +18,6 @@ from events import BufferUpdated, GenerateUpdated, GenerateCleared, SaveState
 # subsection: u
 # list member: orange4
 # unimportant: grey46
-
-# TODO:
-# - add location titles to prompts
-# - inventory, keep things in the brackets, maybe replace brackets
-# - allow option of complete location rewrite
-# - redo actions using items - specify which items are to be used
-# - maybe also list explicit items for picking up
 
 
 class GState:
@@ -34,8 +28,7 @@ class GState:
     history: list
 
     def __init__(self, queue):
-        # self.setting = "RPG game set in a modern world torn by war, with much fighting still going on. The player is a survivor in this dark and dangerous world."
-        self.setting = "RPG game set in an expansive Canadian frozen wilderness in the aftermath of a geomagnetic disaster. The player is a lone survivor facing off against the nature."
+        self.setting = "Totally random"
         self.inventory = []
         self.history = []
         self.llm = Model(queue, debug=True)
@@ -85,9 +78,7 @@ class Game:
             self.events += [ActivateModule(game_config.get("current_module"))]
         else:
             self.gstate.history = []
-            lg = LocationGenerator.create_from_user_input(
-                self.gstate, self.queue, "Adventure awaits!"
-            )
+            lg = GameInit.create(self.gstate, self.queue)
             self.events += [AddModule(lg), ActivateModule(lg.id)]
 
         self.flush_events()
@@ -124,6 +115,10 @@ class Game:
                     self.events += events
             elif e.__class__.__name__ == "UpdateLocationDescription":
                 self.all_modules[e.id].description = e.description
+            elif e.__class__.__name__ == "SetSetting":
+                self.gstate.setting = e.setting
+                for m in self.all_modules.values():
+                    m.set_state(self.gstate)
             elif e.__class__.__name__ == "UpdateInventory":
                 self.gstate.inventory = e.new_inventory.copy()
                 for m in self.all_modules.values():
@@ -162,6 +157,8 @@ class Game:
                         src.exits[k]["id"] = dst.id
 
     def save_state(self):
+        Path("save/modules").mkdir(parents=True, exist_ok=True)
+
         for id, module in self.all_modules.items():
             with open(f"save/modules/{id}.json", "wb") as f:
                 f.write(module.toJSON())
