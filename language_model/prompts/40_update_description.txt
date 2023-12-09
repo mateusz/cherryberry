@@ -1,6 +1,6 @@
 ### System prompt:
 
-Reword the supplied location description for an text adventure game like Zork to show how it changed because of the activity. Make sure to represent the permanent changes appropriately, but avoid describing temporary changes.
+Update the supplied location description for an text adventure game like Zork to show how it changed because of what happened. Make sure to represent the permanent changes appropriately, but avoid describing temporary changes. Remove everything that is no longer true, you can omit the unimportant details.
 
 Do not use word "you", write in the third person perspective and avoid adjectives. Describe the surroundings, but not the events. 
 
@@ -8,38 +8,40 @@ Make sure paragraphs are at most three sentences long.
 
 ### Instruction:
 
-Location description: A room in a little house
+[Location earlier] A room in a little house
 
-Activity: You run through the room, leaving dirty footprints behind.
+[What happened] You run through the room, leaving dirty footprints behind.
 
 ### Response: 
 
-Updated description (paragraphs no longer than three sentences):
-
-A room in little house.
-
-There is dirty footprints on the floor.
+[Location now - don't be afraid to completely rewrite] This room of the little house has dirty footprints on the floor.
 
 ### Instruction:
 
-Location description: The top of the mountain has stunning views. The wind blows hard though, making it hard to stand straight. On one side the surface drops off in a sheer cliff, a meadow can be seen a thousand meters below.
+[Location earlier] A large wooden pergola stands here, with old rose bushes climbing on it.
 
-Activity: You collect some stones and place them in a neat pile, decorating it with flowers. You declare it's an altar to a nature goddess.
+[What happened] You push the pergola over, and with thunderous creak it falls on the side, taking all the rose bushes with it.
 
 ### Response: 
 
-Updated description (paragraphs no longer than three sentences):
-
-The top of the mountain has stunning views. The wind blows hard though, making it hard to stand straight. On one side the surface drops off in a sheer cliff, a meadow can be seen a thousand meters below.
-
-There is a small pile of stones here, decorated with flowers, it's purpose unknown.
+[Location now - don't be afraid to completely rewrite] A pile of wooden rubble is strewn around here, peppered with destroyed roses.
 
 ### Instruction:
 
-Location description: {{description}}
+[Location earlier] The top of the mountain has stunning views. The wind blows hard though, making it hard to stand straight. On one side the surface drops off in a sheer cliff, a meadow can be seen a thousand meters below.
 
-Activity: {{consequences}}
+[What happened] You collect some stones and place them in a neat pile, decorating it with flowers. You declare it's an altar to a nature goddess.
 
 ### Response: 
 
-Updated description (paragraphs no longer than three sentences):
+[Location now - don't be afraid to completely rewrite] The top of the mountain has stunning views. The wind blows hard though, and a meadow can be seen a thousand meters below. There is a small pile of stones here, decorated with flowers, it's purpose unknown.
+
+### Instruction:
+
+[Location earlier] {{description}}
+
+[How the location changed] {{action}} - {{consequences}}
+
+### Response: 
+
+[Location now - don't be afraid to completely rewrite] 

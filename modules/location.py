@@ -52,7 +52,6 @@ class Location(Module):
 
     def on_activate(self):
         self.describe()
-        return [AddHistory(self.description, skip_if_duplicate=True)]
 
     def on_input(self, line):
         cmd = shlex.split(line)
@@ -71,14 +70,21 @@ class Location(Module):
             self.printb()
             self.printb()
 
-            msg = f"You go towards the {ex.get('name')}"
-            self.printb(f"[italic green4]{msg}[/]")
             if ex.get("id", None):
+                if key == "<<back>>":
+                    msg = f"You backtrack towards the {ex.get('name')}."
+                else:
+                    msg = f"You go towards the {ex.get('name')} again."
+                self.printb(f"[italic green4]{msg}[/]")
+
                 return [
                     AddHistory(msg),
                     ActivateModule(ex.get("id")),
                 ]
             else:
+                msg = f"You go towards the {ex.get('name')}. {ex.get('description')}"
+                self.printb(f"[italic green4]{msg}[/]")
+
                 l = LocationGenerator.create_from_exit(self, ex)
                 return [
                     AddHistory(msg),
@@ -96,10 +102,12 @@ class Location(Module):
                         i = n + 1
 
             self.exits[f"<<custom{i}>>"] = ex
-            self.printb(f"Entering '{cmd[1]}'")
+            msg = f"You go towards the {cmd[1]}. {cmd[2]}"
+            self.printb(f"[italic green4]{msg}[/]")
             l = LocationGenerator.create_from_exit(self, ex)
 
             return [
+                AddHistory(msg),
                 AddModule(l),
                 ActivateModule(l.id),
             ]

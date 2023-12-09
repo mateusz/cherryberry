@@ -59,7 +59,7 @@ class Model:
             hist = []
             for i in history:
                 hist += [f"* {i}"]
-        hist = "\n".join(hist[-20:])
+        hist = "\n".join(hist[-10:-1])
 
         prompt = self.tmpl.get_template("00_generate_location.txt").render(
             {
@@ -73,10 +73,10 @@ class Model:
         stream = self.llm.create_completion(
             prompt=prompt,
             max_tokens=2048,
-            temperature=1.2,
+            temperature=1.6,
             repeat_penalty=1.1,
-            top_p=0.95,
-            top_k=40,
+            top_p=0.99,
+            top_k=200,
             stop=["\n\n"],
             stream=True,
         )
@@ -102,7 +102,7 @@ class Model:
             hist = []
             for i in history:
                 hist += [f"* {i}"]
-        hist = "\n".join(hist[-20:])
+        hist = "\n".join(hist[-10:-1])
 
         prompt = self.tmpl.get_template("05_generate_location_from_exit.txt").render(
             {
@@ -118,10 +118,10 @@ class Model:
         stream = self.llm.create_completion(
             prompt=prompt,
             max_tokens=2048,
-            temperature=1.2,
+            temperature=1.6,
             repeat_penalty=1.1,
-            top_p=0.95,
-            top_k=40,
+            top_p=0.99,
+            top_k=200,
             stop=["\n\n"],
             stream=True,
         )
@@ -226,11 +226,11 @@ class Model:
         stream = self.llm.create_completion(
             prompt=prompt,
             max_tokens=2048,
-            temperature=1.2,
+            temperature=1.6,
             repeat_penalty=1.1,
-            top_p=0.95,
-            top_k=40,
-            stop=["\n\n"],
+            top_p=0.99,
+            top_k=200,
+            stop=[],
             stream=True,
         )
         out = ""

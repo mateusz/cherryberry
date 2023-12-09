@@ -2,11 +2,14 @@
 
 Generate a new location description for an text adventure game like Zork. {{setting}}
 
-Make sure the new location suits the entrance leading to it. The new location should introduce something interesting into the story so far. Do not use word "you", write in the third person perspective and avoid adjectives. Describe the surroundings, provide some items to interact with, and possibly add an NPC character.
+Make sure the new location suits the entrance leading to it. The new location should introduce something interesting into the story so far, but should fit thematically with the story.
+
+Do not use word "you", write in the third person perspective and avoid adjectives. Describe the surroundings, provide some items to interact with, and possibly add an NPC character. You may take the player recent history into account.
 
 The story so far, for context only:
 
 {{history}}
+* {{previous}}
 
 Entrance leading to new location: {{exit_name}} - {{exit_description}}
 

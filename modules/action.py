@@ -162,7 +162,7 @@ class Action(Module):
                 )
 
             elif cmd[0] == "a" or cmd[0] == "add":
-                self.new_inventory[cmd[1]] = cmd[2]
+                self.new_inventory += [cmd[1]]
                 self.printb(f"Added item '{cmd[1]}'")
                 self.print_inventory()
                 self.printb(
