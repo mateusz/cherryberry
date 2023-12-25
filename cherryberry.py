@@ -5,7 +5,7 @@ import io
 import sys
 import argparse
 
-from game import Game, WrappyLog
+from game import Game
 from textual import work, events
 from textual.app import App, ComposeResult
 from textual.containers import VerticalScroll

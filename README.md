@@ -30,15 +30,19 @@ Download an LLM to your local machine. Recommended model is [LLaMA2-13B-Psyfight
 
 ```bash
 micromamba create -n cherryberry -f environment.yml
+# or
+micromamba create -n cherryberry -f environment-cuda.yml
+
 micromamba activate cherryberry
+
 poetry install
+# or
+CMAKE_ARGS="-DLLAMA_METAL=on" poetry install
+# or
+CMAKE_ARGS="-DLLAMA_CUBLAS=on" poetry install 
 ```
 
 You might however want to add flags, to get the proper version of LlamaCpp (see [original instructions](https://github.com/ggerganov/llama.cpp)):
-
-```bash
-CMAKE_ARGS="-DLLAMA_METAL=on" poetry install
-```
 
 Then to run the game (settings given here are appropriate for Psyfighter):
 
@@ -52,6 +56,8 @@ python3 -m cherryberry \
 	-ngl 1 \
 	--threads 4
 ```
+
+Change `ngl` and `threads` to suit.
 
 To run the game in the debug mode:
 

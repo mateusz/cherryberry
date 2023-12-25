@@ -1,0 +1,8 @@
+name: cherryberry
+channels:
+  - conda-forge
+dependencies:
+  - python=3.9
+  - cudatoolkit-dev=11.2
+  - cudnn=8.1.0
+  - poetry
