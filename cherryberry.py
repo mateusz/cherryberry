@@ -149,8 +149,6 @@ if __name__ == "__main__":
     parser.add_argument("-m", "--model", type=str)
     parser.add_argument("-ngl", "--gpu-layers", type=int)
     parser.add_argument("-c", "--n_ctx", type=int)
-    parser.add_argument("--rope_freq_base", type=int)
-    parser.add_argument("--rope_freq_scale", type=int)
     parser.add_argument("-b", "--n_batch", type=int)
     parser.add_argument("-t", "--threads", type=int)
     parser.add_argument("--mlock", action="store_true")

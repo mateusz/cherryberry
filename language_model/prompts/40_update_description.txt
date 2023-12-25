@@ -1,8 +1,6 @@
-### System prompt:
-
 Update the supplied location description for an text adventure game like Zork to show how it changed because of what happened. Make sure to represent the permanent changes appropriately, but avoid describing temporary changes. Remove everything that is no longer true, you can omit the unimportant details.
 
-Do not use word "you", write in the third person perspective and avoid adjectives. Describe the surroundings, but not the events. 
+Do not use word "you", do not mention the player, write in the third person perspective and avoid adjectives. Describe the surroundings, but not the events. 
 
 Make sure paragraphs are at most three sentences long.
 

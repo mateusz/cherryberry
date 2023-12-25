@@ -22,42 +22,61 @@ This demo has been recorded on an M1 Mac with 32 GB RAM. The demo is in real tim
 
 ## Running
 
-The following instructions are for Mac. They should work on other OSes but I haven't tried it, ping me if you have corrections!
-
 Download an LLM to your local machine. Recommended model is [LLaMA2-13B-Psyfighter2-GGUF](https://huggingface.co/KoboldAI/LLaMA2-13B-Psyfighter2-GGUF), the Q4_K_M variant. Why is it recommended you may ask? Because this is the model I've made the game with 😂
 
-[Install micromamba](https://mamba.readthedocs.io/en/latest/installation/micromamba-installation.html), then:
+The following instructions are for Metal on Mac and CUDA on Linux.
+
+My preferred installation option is via micromamba. [Install micromamba](https://mamba.readthedocs.io/en/latest/installation/micromamba-installation.html), then:
 
 ```bash
+# For Mac:
 micromamba create -n cherryberry -f environment.yml
-# or
+# For Linux/CUDA:
 micromamba create -n cherryberry -f environment-cuda.yml
 
 micromamba activate cherryberry
+```
 
+If your system has python (and CUDA dependencies on Nvidia) already installed (for Nvidia, try to run `nvcc`), then you should be able to skip the above step.
+
+Install dependencies:
+
+```bash
+# For CPU:
 poetry install
-# or
+# For Mac M*:
 CMAKE_ARGS="-DLLAMA_METAL=on" poetry install
-# or
+# For Linux/CUDA:
 CMAKE_ARGS="-DLLAMA_CUBLAS=on" poetry install 
 ```
 
-You might however want to add flags, to get the proper version of LlamaCpp (see [original instructions](https://github.com/ggerganov/llama.cpp)):
+If you don't like poetry, you can also install the dependencies manually using `pip` - have a look at the list in `pyproject.toml`.
 
-Then to run the game (settings given here are appropriate for Psyfighter):
+If you are running into problems with compiling LlamaCpp for your target, go to [llama-cpp-python](https://github.com/abetlen/llama-cpp-python) and [LlamaCpp instructions](https://github.com/ggerganov/llama.cpp)). In particular, I'm not sure how to install this in Windows.
+
+Warning: poetry will compile LlamaCpp only on the first install, if you change the compile time flags (`LLAMA_METAL`, `LLAMA_CUBLAS` etc) you can force recompilation with:
 
 ```bash
+poetry remove llama-cpp-python
+CMAKE_ARGS="-DLLAMA_CUBLAS=on" poetry add llama-cpp-python
+# Note the messes around with pyproject.toml and poetry.lock
+```
+
+Finally to run the game (settings given here are appropriate for Psyfighter):
+
+```bash
+# For Mac:
 python3 -m cherryberry \
 	--model ../models/LLaMA2-13B-Psyfighter2.Q4_K_M.gguf \
 	--n_ctx 4096 \
 	--n_batch 512 \
-	--rope_freq_scale 1 \
-	--rope_freq_base 10000 \
 	-ngl 1 \
 	--threads 4
 ```
 
-Change `ngl` and `threads` to suit.
+Change `ngl` and `threads` to suit. `ngl` should be 1 on Mac, and actual number of layers to offload on Linux/CUDA.
+
+## Debug mode
 
 To run the game in the debug mode:
 

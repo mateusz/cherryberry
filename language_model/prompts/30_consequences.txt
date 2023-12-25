@@ -1,10 +1,10 @@
 ### Instruction:
 
-From supplied location description, generate consequences of your activity which used the items listed.
+From supplied location description, generate consequences of the player activity which used the items listed.
 
 Location description: {{description}}
 
-Your activity: {{action}}
+Player activity: {{action}}
 
 Items used:
 
@@ -12,4 +12,5 @@ Items used:
 
 ### Response: 
 
-One sentence describing the consequences of your activity: 
+One sentence describing the consequences of player activity:
+

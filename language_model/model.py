@@ -34,8 +34,6 @@ class Model:
             model_path=args.model,
             n_ctx=args.n_ctx,
             n_batch=args.n_batch,
-            rope_freq_scale=args.rope_freq_scale,
-            rope_freq_base=args.rope_freq_base,
             n_gpu_layers=args.gpu_layers,
             n_threads=args.threads,
             seed=int(time.time()),
@@ -78,7 +76,7 @@ class Model:
             repeat_penalty=1.1,
             top_p=0.99,
             top_k=200,
-            stop=["\n\n"],
+            stop=["\n\n", "#"],
             stream=True,
         )
         out = ""
@@ -123,7 +121,7 @@ class Model:
             repeat_penalty=1.1,
             top_p=0.99,
             top_k=200,
-            stop=["\n\n"],
+            stop=["\n\n", "#"],
             stream=True,
         )
         out = ""
@@ -164,7 +162,7 @@ class Model:
             repeat_penalty=1.1,
             top_p=0.95,
             top_k=40,
-            stop=["\n\n"],
+            stop=["\n\n", "#"],
             stream=True,
         )
         out = "* "
@@ -231,7 +229,7 @@ class Model:
             repeat_penalty=1.1,
             top_p=0.99,
             top_k=200,
-            stop=[],
+            stop=["\n\n", "#"],
             stream=True,
         )
         out = ""
@@ -264,7 +262,7 @@ class Model:
             repeat_penalty=1.1,
             top_p=0.95,
             top_k=40,
-            stop=[],
+            stop=["#"],
             stream=True,
         )
 
@@ -307,7 +305,7 @@ class Model:
             repeat_penalty=1.1,
             top_p=0.95,
             top_k=40,
-            stop=[],
+            stop=["#"],
             stream=True,
         )
         out = "1. "
@@ -340,7 +338,7 @@ class Model:
             repeat_penalty=1.1,
             top_p=0.95,
             top_k=40,
-            stop=["\n\n"],
+            stop=["\n\n", "#"],
             stream=True,
         )
         out = "* "
@@ -389,7 +387,7 @@ class Model:
             repeat_penalty=1.1,
             top_p=0.95,
             top_k=40,
-            stop=["`"],
+            stop=["`", "#"],
             stream=True,
         )
 
@@ -454,7 +452,7 @@ class Model:
             repeat_penalty=1.1,
             top_p=0.95,
             top_k=40,
-            stop=["`"],
+            stop=["`", "#"],
             stream=True,
         )
         out = ""

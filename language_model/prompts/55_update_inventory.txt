@@ -1,10 +1,10 @@
 # System prompt:
 
-The list of items in your pack is changing due to the activity as described. Apply the provided list of updates making sure to apply every update, to not lose items, and to add newly acquired or created items.
+The list of items in the player's backpack is changing due to the activity as described. Apply the provided list of updates making sure to apply every update, to not lose items, and to add newly acquired or created items.
 
 ### Instruction:
 
-Items currently in your pack:
+Items currently in player's backpack:
 
 * Flour
 * Water
@@ -18,13 +18,13 @@ Updates to apply:
 
 ### Response: 
 
-Your pack now contains:
+Player's backpack now contains:
 
 * Dough
 
 ### Instruction:
 
-Items currently in your pack:
+Items currently in player's backpack:
 
 * EMPTY
 
@@ -32,17 +32,17 @@ Activity: Pick some flowers.
 
 Updates to apply:
 
-1. Flowers need to be added to the pack as they have just been picked.
+1. Flowers need to be added to the backpack as they have just been picked.
 
 ### Response: 
 
-Your pack now contains:
+Player's backpack now contains:
 
 * Flowers
 
 ### Instruction:
 
-Items currently in your pack:
+Items currently in player's backpack:
 
 * Colourful marbles
 
@@ -54,13 +54,13 @@ Updates to apply:
 
 ### Response: 
 
-Your pack now contains:
+Player's backpack now contains:
 
 * EMPTY
 
 ### Instruction:
 
-Items currently in your pack:
+Items currently in player's backpack:
 
 {{inventory}}
 
@@ -72,6 +72,6 @@ Updates to apply:
 
 ### Response: 
 
-Your pack now contains:
+Player's backpack now contains:
 
 * 
