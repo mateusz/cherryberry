@@ -179,7 +179,9 @@ class Action(Module):
 
     def get_action_items(self):
         out = self.gstate.llm.action_items(
-            self.location_description, self.gstate.inventory, self.action
+            self.location_description,
+            self.gstate.inventory,
+            self.action,
         )
 
         self.action_items = out
@@ -187,6 +189,7 @@ class Action(Module):
 
     def generate_consequences(self):
         out = self.gstate.llm.consequences(
+            self.gstate.setting,
             self.gstate.history,
             self.location_description,
             self.action_items,
@@ -203,7 +206,10 @@ class Action(Module):
 
     def update_description(self):
         out = self.gstate.llm.update_description(
-            self.location_description, self.action, self.consequences
+            self.gstate.setting,
+            self.location_description,
+            self.action,
+            self.consequences,
         )
 
         self.new_description = out

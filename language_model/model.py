@@ -52,18 +52,17 @@ class Model:
     def generate_location(self, setting, history, requirements):
         self.printb("[grey46][Generating location...][/]")
 
-        if len(history) == 0:
-            hist = ["* EMPTY"]
-        else:
+        htext = ""
+        if len(history) != 0:
             hist = []
-            for i in history:
+            for i in history[-10:]:
                 hist += [f"* {i}"]
-        hist = "\n".join(hist[-10:-1])
+            htext = "The story so far, for context only:\n\n" + "\n".join(hist)
 
         prompt = self.tmpl.get_template("00_generate_location.txt").render(
             {
                 "setting": setting,
-                "history": hist,
+                "history": htext,
                 "requirements": requirements,
             }
         )
@@ -95,18 +94,17 @@ class Model:
     ):
         self.printb("[grey46][Generating location from exit...][/]")
 
-        if len(history) == 0:
-            hist = ["* EMPTY"]
-        else:
+        htext = ""
+        if len(history) != 0:
             hist = []
-            for i in history:
+            for i in history[-10:]:
                 hist += [f"* {i}"]
-        hist = "\n".join(hist[-10:-1])
+            htext = "The story so far, for context only:\n\n" + "\n".join(hist)
 
         prompt = self.tmpl.get_template("05_generate_location_from_exit.txt").render(
             {
                 "setting": setting,
-                "history": hist,
+                "history": htext,
                 "previous": previous,
                 "exit_name": exit_name,
                 "exit_description": exit_description,
@@ -193,16 +191,15 @@ class Model:
             logging.debug(items)
         return items
 
-    def consequences(self, history, description, inventory, action):
+    def consequences(self, setting, history, description, inventory, action):
         self.printb("[grey46][Generating consequences...][/]")
 
-        if len(history) == 0:
-            hist = ["* EMPTY"]
-        else:
+        htext = ""
+        if len(history) != 0:
             hist = []
-            for i in history:
+            for i in history[-10:]:
                 hist += [f"* {i}"]
-        hist = "\n".join(hist[-20:])
+            htext = "The story so far, for context only:\n\n" + "\n".join(hist)
 
         if len(inventory) == 0:
             inv = ["* EMPTY"]
@@ -214,7 +211,8 @@ class Model:
 
         prompt = self.tmpl.get_template("30_consequences.txt").render(
             {
-                "history": hist,
+                "setting": setting,
+                "history": htext,
                 "description": description,
                 "inventory": inv,
                 "action": action,
@@ -243,11 +241,12 @@ class Model:
             logging.debug(out)
         return out
 
-    def update_description(self, description, action, consequences):
+    def update_description(self, setting, description, action, consequences):
         self.printb("[grey46][Generating update description...][/]")
 
         prompt = self.tmpl.get_template("40_update_description.txt").render(
             {
+                "setting": setting,
                 "description": description,
                 "action": action,
                 "consequences": consequences,
@@ -371,11 +370,11 @@ class Model:
             logging.debug(items)
         return items
 
-    def find_exits(self, location_description):
+    def find_exits(self, setting, location_description):
         self.printb("[grey46][Generating find exits...][/]")
 
         prompt = self.tmpl.get_template("10_find_exits.txt").render(
-            {"description": location_description}
+            {"setting": setting, "description": location_description}
         )
         if self.debug:
             logging.debug(prompt)

@@ -45,13 +45,13 @@ class GameInit(Module):
     def on_activate(self):
         if self.state == GameInit_States.BEGIN:
             self.printb(
-                "[deep_sky_blue4]Provide a one sentence setting for the game (this will drive the entire game):[/]"
+                "[deep_sky_blue4]Provide a one sentence setting for the game (this will drive the entire game). The setting will be appended after 'for a text adventure game like Zork, '[/]"
             )
             self.printb(
-                "[gray50]Example 1: RPG game set in a modern world torn by war, with much fighting still going on. The player is a survivor in this dark and dangerous world.[/]"
+                "[gray50]Example 1: an RPG game set in a modern world torn by war, with much fighting still going on. The player is a survivor in this dark and dangerous world.[/]"
             )
             self.printb(
-                "[gray50]Example 2: RPG game set in an expansive Canadian frozen wilderness in the aftermath of a geomagnetic disaster. The player is a lone survivor facing off against the nature.[/]"
+                "[gray50]Example 2: an RPG game set in an expansive Canadian frozen wilderness in the aftermath of a geomagnetic disaster. The player is a lone survivor facing off against the nature.[/]"
             )
         elif self.state == GameInit_States.AFTER_SETTING:
             self.printb(f"[orange4]Setting[/]: {self.setting}")

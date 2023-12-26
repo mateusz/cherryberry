@@ -327,7 +327,9 @@ class LocationGenerator(Module):
         self.description = out
 
         try:
-            self.exits = self.gstate.llm.find_exits(self.description)
+            self.exits = self.gstate.llm.find_exits(
+                self.gstate.setting, self.description
+            )
         except Exception:
             self.printb("[No exits found]")
             self.exits = {}
