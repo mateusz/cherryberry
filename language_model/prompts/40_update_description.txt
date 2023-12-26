@@ -1,4 +1,8 @@
-Update the supplied location description for an text adventure game like Zork to show how it changed because of what happened. Make sure to represent the permanent changes appropriately, but avoid describing temporary changes. Remove everything that is no longer true, you can omit the unimportant details.
+### System prompt:
+
+Update the supplied location description for a text adventure game like Zork, {{setting}}.
+
+Show how it changed because of what happened. Make sure to represent the permanent changes appropriately, but avoid describing temporary changes. Remove everything that is no longer true, you can omit the unimportant details.
 
 Do not use word "you", do not mention the player, write in the third person perspective and avoid adjectives. Describe the surroundings, but not the events. 
 
@@ -6,40 +10,40 @@ Make sure paragraphs are at most three sentences long.
 
 ### Instruction:
 
-[Location earlier] A room in a little house
+Location earlier: A room in a little house
 
-[What happened] You run through the room, leaving dirty footprints behind.
+What happened: You run through the room, leaving dirty footprints behind.
 
 ### Response: 
 
-[Location now - don't be afraid to completely rewrite] This room of the little house has dirty footprints on the floor.
+Location now - don't be afraid to completely rewrite: This room of the little house has dirty footprints on the floor.
 
 ### Instruction:
 
-[Location earlier] A large wooden pergola stands here, with old rose bushes climbing on it.
+Location earlier: A large wooden pergola stands here, with old rose bushes climbing on it.
 
-[What happened] You push the pergola over, and with thunderous creak it falls on the side, taking all the rose bushes with it.
+What happened: You push the pergola over, and with thunderous creak it falls on the side, taking all the rose bushes with it.
 
 ### Response: 
 
-[Location now - don't be afraid to completely rewrite] A pile of wooden rubble is strewn around here, peppered with destroyed roses.
+Location now - don't be afraid to completely rewrite: A pile of wooden rubble is strewn around here, peppered with destroyed roses.
 
 ### Instruction:
 
-[Location earlier] The top of the mountain has stunning views. The wind blows hard though, making it hard to stand straight. On one side the surface drops off in a sheer cliff, a meadow can be seen a thousand meters below.
+Location earlier: The top of the mountain has stunning views. The wind blows hard though, making it hard to stand straight. On one side the surface drops off in a sheer cliff, a meadow can be seen a thousand meters below.
 
-[What happened] You collect some stones and place them in a neat pile, decorating it with flowers. You declare it's an altar to a nature goddess.
+What happened: You collect some stones and place them in a neat pile, decorating it with flowers. You declare it's an altar to a nature goddess.
 
 ### Response: 
 
-[Location now - don't be afraid to completely rewrite] The top of the mountain has stunning views. The wind blows hard though, and a meadow can be seen a thousand meters below. There is a small pile of stones here, decorated with flowers, it's purpose unknown.
+Location now - don't be afraid to completely rewrite: The top of the mountain has stunning views. The wind blows hard though, and a meadow can be seen a thousand meters below. There is a small pile of stones here, decorated with flowers, it's purpose unknown.
 
 ### Instruction:
 
-[Location earlier] {{description}}
+Location earlier: {{description}}
 
-[How the location changed] {{action}} - {{consequences}}
+How the location changed: {{action}} - {{consequences}}
 
 ### Response: 
 
-[Location now - don't be afraid to completely rewrite] 
+Location now - don't be afraid to completely rewrite, but don't lose any important information: 

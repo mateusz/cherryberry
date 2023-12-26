@@ -1,6 +1,10 @@
 ### Instruction:
 
-From supplied location description, generate consequences of the player activity which used the items listed.
+From supplied location description, generate consequences of the player activity for a text adventure game like Zork, {{setting}}
+
+Use the items listed. You may take the player recent history into account.
+
+{{history}}
 
 Location description: {{description}}
 

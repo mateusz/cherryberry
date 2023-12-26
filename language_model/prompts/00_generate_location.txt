@@ -1,17 +1,12 @@
 ### Instruction:
 
-Generate a new location description for an text adventure game like Zork. {{setting}}
+Generate a new location description for a text adventure game like Zork, {{setting}}
 
 Use supplied requirements. The new location should introduce something interesting into the story so far, but should fit thematically with the story.
 
 Do not use word "you", do not mention the player, write in the third person perspective and avoid adjectives. Describe the surroundings, provide some items to interact with, and possibly add an NPC character. If you want you may take the player recent history into account.
 
-The story so far, for context only:
-
 {{history}}
-* {{previous}}
-
-Previous location: {{previous}}
 
 Requirements: {{requirements}}
 

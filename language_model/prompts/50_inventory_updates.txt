@@ -1,4 +1,4 @@
-# System prompt:
+### System prompt:
 
 From supplied list of items in the player's backpack, generate a list of updates that need to be done as a result of the activity. Items may need to be added or removed from the pack, or may need to be edited.
 

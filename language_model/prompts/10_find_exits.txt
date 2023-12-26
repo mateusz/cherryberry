@@ -1,6 +1,8 @@
 ### Instruction:
 
-From supplied description of a current location, generate a JSON list of available exits to other destination. For each specific destination, include exit name and one-sentence description that is significantly different from the current location. Use the following schema:
+From supplied description of a current location, generate a JSON list of available exits to other destination for a text adventure game like Zork, {{setting}}
+
+For each specific destination, include exit name and one-sentence description that is significantly different from the current location. Use the following schema:
 
 ```json-schema
 {
