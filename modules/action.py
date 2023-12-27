@@ -212,7 +212,7 @@ class Action(Module):
             self.consequences,
         )
 
-        self.new_description = out
+        self.new_description = self.location_description + "\n\n" + out
         self.state = Action_States.AFTER_UPDATED_DESCRIPTION
 
         self.printb()

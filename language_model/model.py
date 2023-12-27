@@ -261,7 +261,7 @@ class Model:
             repeat_penalty=1.1,
             top_p=0.95,
             top_k=40,
-            stop=["#"],
+            stop=["\n\n", "#"],
             stream=True,
         )
 
