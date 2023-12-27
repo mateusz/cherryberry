@@ -80,7 +80,7 @@ class Location(Module):
                 self.printb(f"[italic green4]{msg}[/]")
 
                 return [
-                    # AddHistory(msg),
+                    AddHistory(msg),
                     ActivateModule(ex.get("id")),
                 ]
             else:
@@ -89,7 +89,7 @@ class Location(Module):
 
                 l = LocationGenerator.create_from_exit(self, ex)
                 return [
-                    # AddHistory(msg),
+                    AddHistory(msg),
                     AddModule(l),
                     ActivateModule(l.id),
                 ]

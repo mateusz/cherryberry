@@ -1,54 +1,10 @@
-### System prompt:
+### Instruction:
 
 From supplied list of items in the player's backpack, generate a list of updates that need to be done as a result of the activity. Items may need to be added or removed from the pack, or may need to be edited.
 
-Do not make items up, you can only work provided items and the activity. Keep the response factual. Do not add status effects. Work only with things.
+Keep the response factual. Do not add status effects. Work only with things.
 
-### Instruction:
-
-Items currently in player's backpack:
-
-* Flour
-* Water
-
-Activity: You make bread from flour and yeast.
-
-### Response: 
-
-List of required updates to the player's backpack contents, reason step by step: 
-
-1. Flour and water need to be removed as they are combined to make dough.
-2. Dough needs to be added as it has just been created.
-
-### Instruction:
-
-Items currently in player's backpack:
-
-* EMPTY
-
-Activity: Pick some flowers.
-
-### Response: 
-
-List of required updates to the player's backpack contents, reason step by step: 
-
-1. Flowers need to be added to the backpack as they have just been picked.
-
-### Instruction:
-
-Items currently in player's backpack:
-
-* Colourful marbles
-
-Activity: Drop the marbles on the floor creating a slippery trap.
-
-### Response: 
-
-List of required updates to the player's backpack contents, reason step by step: 
-
-1. Marbles need to be removed as they have just been dropped on the floor.
-
-### Instruction:
+Only work provided items and the activity. Only add items if the player action actually created or obtained them. Do not conjure new items out of nowhere.
 
 Items currently in player's backpack:
 

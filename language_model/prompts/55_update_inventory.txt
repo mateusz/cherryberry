@@ -1,64 +1,6 @@
-### System prompt:
+### Instruction:
 
 The list of items in the player's backpack is changing due to the activity as described. Apply the provided list of updates making sure to apply every update, to not lose items, and to add newly acquired or created items.
-
-### Instruction:
-
-Items currently in player's backpack:
-
-* Flour
-* Water
-
-Activity: You make bread from flour and yeast.
-
-Updates to apply:
-
-1. Flour and water are combined to make dough, so they both need to be removed.
-2. Dough has just been created and needs to be added to the inventory.
-
-### Response: 
-
-Player's backpack now contains:
-
-* Dough
-
-### Instruction:
-
-Items currently in player's backpack:
-
-* EMPTY
-
-Activity: Pick some flowers.
-
-Updates to apply:
-
-1. Flowers need to be added to the backpack as they have just been picked.
-
-### Response: 
-
-Player's backpack now contains:
-
-* Flowers
-
-### Instruction:
-
-Items currently in player's backpack:
-
-* Colourful marbles
-
-Activity: You drop the marbles on the floor creating a slippery trap.
-
-Updates to apply:
-
-1. Marbles need to be removed as they have just been dropped on the floor.
-
-### Response: 
-
-Player's backpack now contains:
-
-* EMPTY
-
-### Instruction:
 
 Items currently in player's backpack:
 

@@ -1,4 +1,4 @@
-### System prompt:
+### Instruction:
 
 Describe how the location changed in a text adventure game like Zork, {{setting}}.
 
@@ -6,12 +6,18 @@ Add one sentence to show how it changed because of what happened. Make sure to r
 
 Do not use word "you", do not mention the player, write in the third person perspective and avoid adjectives. Describe the surroundings, but not the events. 
 
-### Instruction:
+Location earlier: 
 
-Location earlier: {{description}}
+```
+{{description}}
+```
 
-What happened: {{action}} - {{consequences}}
+What happened:
+
+```
+{{action}} - {{consequences}}
+```
 
 ### Response: 
 
-One sentence describing the change, keep it short: 
+Additional sentence describing the change, keep it short, do NOT repeat what was already mentioned: 
