@@ -1,0 +1,22 @@
+root ::= array "\n" "`"
+
+val ::= "{" ws "\"exit_name\"" ":" ws shortstring "," ws "\"transition_text\"" ":" ws youstring "," ws "\"new_location_name\"" ":" ws shortstring "," ws "\"new_location_description\"" ":" ws shortstring "}" ws
+
+array ::= "[" ws (val)? ( "," ws val )? ( "," ws val )? "]"
+
+string ::=
+  "\"" (
+    [a-zA-Z, ]
+  )+ "\"" ws
+
+shortstring ::=
+  "\"" (
+    [a-zA-Z ]
+  )+ "\"" ws
+
+youstring ::=
+  "\"You " (
+    [a-zA-Z, ]
+  )+ "\"" ws
+
+ws ::= [ \t\n]{0,10}

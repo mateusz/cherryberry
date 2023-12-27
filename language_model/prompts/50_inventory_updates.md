@@ -1,0 +1,18 @@
+### Instruction:
+
+From supplied list of items in the player's backpack, generate a list of updates that need to be done as a result of the activity. Items may need to be added or removed from the pack, or may need to be edited.
+
+Keep the response factual. Do not add status effects. Work only with things.
+
+Only work provided items and the activity. Only add items if the player action actually created or obtained them. Do not conjure new items out of nowhere.
+
+Items currently in player's backpack:
+
+{{inventory}}
+
+Activity: {{consequences}}
+
+### Response: 
+
+List of required updates to the player's backpack contents, reason step by step: 
+

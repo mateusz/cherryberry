@@ -18,6 +18,7 @@ class Location(Module):
     name: str
     description: str
     exits: object
+    items: object
     state: Location_States
 
     help_text = """\
@@ -34,7 +35,7 @@ class Location(Module):
 """
 
     @staticmethod
-    def create(gstate, queue, name, description, exits):
+    def create(gstate, queue, name, description, exits, items):
         l = Location(
             gstate,
             queue,
@@ -42,6 +43,7 @@ class Location(Module):
                 "name": name.strip(),
                 "description": description.strip(),
                 "exits": exits,
+                "items": items,
                 "state": Location_States.START,
                 "id": hashlib.md5(description.encode("utf-8")).hexdigest(),
             },
@@ -65,6 +67,9 @@ class Location(Module):
             )
         elif cmd[0] == "look" or cmd[0] == "l":
             self.describe()
+        # TODO add ability to look towards an exit to see the location
+        # TODO add ability to search for items
+        # TODO add ability to look at items in inventory
         elif cmd[0] == "go" or cmd[0] == "g":
             exit_number = int(cmd[1]) - 1
             key = list(self.exits.keys())[exit_number]
@@ -76,20 +81,20 @@ class Location(Module):
                 if key == "<<back>>":
                     msg = f"You backtrack towards the {ex.get('name')}."
                 else:
-                    msg = f"You go towards the {ex.get('name')} again."
+                    msg = f"{ex.get('transition_text')}"
                 self.printb(f"[italic green4]{msg}[/]")
 
                 return [
-                    # AddHistory(msg),
+                    AddHistory(msg),
                     ActivateModule(ex.get("id")),
                 ]
             else:
-                msg = f"You go towards the {ex.get('name')}. {ex.get('description')}"
+                msg = f"{ex.get('transition_text')}"
                 self.printb(f"[italic green4]{msg}[/]")
 
                 l = LocationGenerator.create_from_exit(self, ex)
                 return [
-                    # AddHistory(msg),
+                    AddHistory(msg),
                     AddModule(l),
                     ActivateModule(l.id),
                 ]
@@ -162,11 +167,17 @@ class Location(Module):
         self.printb()
         self.printb(f"{self.description}")
         self.describe_exits()
+        self.describe_items()
 
     def describe_exits(self):
         self.printb()
         self.printb("[u]Exits:[/]")
         i = 0
+
+        if not len(self.exits.keys()):
+            self.printb("None!")
+            return
+
         for key, ex in self.exits.items():
             i += 1
             if key == "<<back>>":
@@ -175,12 +186,25 @@ class Location(Module):
                 )
             elif ex.get("id", None):
                 self.printb(
-                    f"[orange4]({i}) {ex.get('name')} [italic](visited)[/][/] -> {ex.get('description')} (already visited)"
+                    f"[orange4]({i}) {ex.get('name')} [italic](visited)[/][/] (already visited) - towards {ex.get('new_location_name')}"
                 )
             else:
                 self.printb(
-                    f"[orange4]({i}) {ex.get('name')} [/]-> {ex.get('description')}"
+                    f"[orange4]({i}) {ex.get('exit_name')}[/] - towards {ex.get('new_location_name')}"
                 )
+
+    def describe_items(self):
+        self.printb()
+        self.printb("[u]Items:[/]")
+        i = 0
+
+        if not len(self.items.keys()):
+            self.printb("None!")
+            return
+
+        for key, it in self.items.items():
+            i += 1
+            self.printb(f"[orange4]({i}) {it.get('name')} [/]")
 
     def extra_json(self, d):
         d["state"] = self.state.value
@@ -191,6 +215,8 @@ class LocationGenerator_States(Enum):
     GET_REQUIREMENTS = 1
     AFTER_REQUIREMENTS = 2
     AFTER_DESCRIPTION = 3
+    AFTER_EXITS = 4
+    AFTER_ITEMS = 5
 
 
 class LocationGenerator(Module):
@@ -204,6 +230,7 @@ class LocationGenerator(Module):
     from_exit: object
     description: str
     exits: object
+    items: object
     state: LocationGenerator_States
     location: Location
 
@@ -222,6 +249,7 @@ class LocationGenerator(Module):
                 "state": LocationGenerator_States.GET_REQUIREMENTS,
                 "description": "",
                 "exits": {},
+                "items": {},
                 "id": "LocationGenerator",
             },
         )
@@ -233,7 +261,7 @@ class LocationGenerator(Module):
             previous.gstate,
             previous.queue,
             {
-                "name": exit.get("name"),
+                "name": exit.get("new_location_name"),
                 "requirements": None,
                 "from_previous_name": previous.name,
                 "from_previous_description": previous.description,
@@ -242,6 +270,7 @@ class LocationGenerator(Module):
                 "state": LocationGenerator_States.AFTER_REQUIREMENTS,
                 "description": "",
                 "exits": {},
+                "items": {},
                 "id": "LocationGenerator",
             },
         )
@@ -250,9 +279,17 @@ class LocationGenerator(Module):
     def __init__(self, gstate, queue, from_data):
         super().__init__(gstate, queue, from_data)
         self.state = LocationGenerator_States(from_data["state"])
-        if self.state == LocationGenerator_States.AFTER_DESCRIPTION:
+        if self.state not in [
+            LocationGenerator_States.GET_REQUIREMENTS,
+            LocationGenerator_States.AFTER_REQUIREMENTS,
+        ]:
             self.location = Location.create(
-                self.gstate, self.queue, self.name, self.description, self.exits
+                self.gstate,
+                self.queue,
+                self.name,
+                self.description,
+                self.exits,
+                self.items,
             )
         else:
             self.location = None
@@ -269,6 +306,18 @@ class LocationGenerator(Module):
             self.printb()
             self.printb(
                 "[deep_sky_blue4]Do you want to keep this location? [KEEP/(reg)enerate/(rew)rite][/]"
+            )
+        elif self.state == LocationGenerator_States.AFTER_EXITS:
+            self.location.describe()
+            self.printb()
+            self.printb(
+                "[deep_sky_blue4]Do you want to keep this list of exits? [KEEP/(reg)enerate/(s)kip][/]"
+            )
+        elif self.state == LocationGenerator_States.AFTER_ITEMS:
+            self.location.describe()
+            self.printb()
+            self.printb(
+                "[deep_sky_blue4]Do you want to keep this list of items? [KEEP/(reg)enerate/(s)kip][/]"
             )
 
     def on_input(self, line):
@@ -295,55 +344,127 @@ class LocationGenerator(Module):
                     "[deep_sky_blue4]Provide requirements for the location (these will drive generation):[/]"
                 )
             elif line == "" or line == "keep":
-                events = [
-                    DeleteModule(self.id),
-                    AddModule(self.location),
-                ]
+                self.generate_exits_from_description()
+                self.state = LocationGenerator_States.AFTER_EXITS
 
-                if self.from_previous_id:
-                    events += [ConnectLocation(self.from_previous_id, self.location.id)]
+        elif self.state == LocationGenerator_States.AFTER_EXITS:
+            if line == "reg" or line == "regenerate":
+                self.exits = {}
+                self.generate_exits_from_description()
+            elif line == "s" or line == "skip":
+                self.exits = {}
+                self.generate_items_from_description()
+                self.state = LocationGenerator_States.AFTER_ITEMS
+            elif line == "" or line == "keep":
+                self.generate_items_from_description()
+                self.state = LocationGenerator_States.AFTER_ITEMS
 
-                events += (ActivateModule(self.location.id),)
-
-                return events
+        elif self.state == LocationGenerator_States.AFTER_ITEMS:
+            if line == "reg" or line == "regenerate":
+                self.items = {}
+                self.generate_items_from_description()
+            elif line == "s" or line == "skip":
+                self.items = {}
+                return self.finalize()
+            elif line == "" or line == "keep":
+                return self.finalize()
 
     def generate_description_from_requirements(self):
         self.printb()
         self.printb(f"[bold deep_pink3]--- {self.name} ---[/]")
         self.printb()
+        # TODO make one version for initial location, and the other version for subsequent location
+        # Not like now, where one version is with custom requirements and other isn't (because there is no difference now!)
         if self.requirements:
             out = self.gstate.llm.generate_location(
-                self.gstate.setting, self.gstate.history, self.requirements
+                self.gstate.setting, self.gstate.history, self.name, self.requirements
             )
         else:
             out = self.gstate.llm.generate_location_from_exit(
                 self.gstate.setting,
                 self.gstate.history,
                 self.from_previous_description,
-                self.from_exit.get("name"),
-                self.from_exit.get("description"),
+                self.from_exit.get("new_location_name"),
+                self.from_exit.get("new_location_description"),
             )
 
         self.description = out
 
-        try:
-            self.exits = self.gstate.llm.find_exits(
-                self.gstate.setting, self.description
-            )
-        except Exception:
-            self.printb("[No exits found]")
-            self.exits = {}
-
         self.location = Location.create(
-            self.gstate, self.queue, self.name, self.description, self.exits
+            self.gstate, self.queue, self.name, self.description, {}, {}
         )
         self.state = LocationGenerator_States.AFTER_DESCRIPTION
-        self.location.describe_exits()
 
         self.printb()
         self.printb(
             "[deep_sky_blue4]Do you want to keep this location? [KEEP/(reg)enerate/(rew)rite][/]"
         )
+
+    def generate_exits_from_description(self):
+        self.exits = {}
+        try:
+            for exit in self.gstate.llm.find_exits(
+                self.gstate.setting, self.description
+            ):
+                self.exits[exit.get("exit_name", "???")] = {
+                    "exit_name": exit.get("exit_name", "???"),
+                    "transition_text": exit.get("transition_text", "???"),
+                    "new_location_name": exit.get("new_location_name", "???"),
+                    "new_location_description": exit.get(
+                        "new_location_description", "???"
+                    ),
+                }
+        except Exception as e:
+            self.printb(str(e))
+            self.printb("[No exits found]")
+            self.exits = {}
+
+        self.location.exits = self.exits
+        self.state = LocationGenerator_States.AFTER_EXITS
+        self.location.describe_exits()
+
+        self.printb()
+        self.printb(
+            "[deep_sky_blue4]Do you want to keep these exits? [KEEP/(reg)enerate/(s)kip][/]"
+        )
+
+    # TODO move this into a separate "search for items" module
+    def generate_items_from_description(self):
+        try:
+            for item in self.gstate.llm.find_items(
+                self.gstate.setting, self.description
+            ):
+                self.items[item.get("name", "???")] = {
+                    "name": item.get("name", "???"),
+                    "obtain_action": item.get("obtain_action", "???"),
+                    "description": item.get("description", "???"),
+                }
+        except Exception as e:
+            self.printb(str(e))
+            self.printb("[No items found]")
+            self.exits = {}
+
+        self.location.items = self.items
+        self.state = LocationGenerator_States.AFTER_ITEMS
+        self.location.describe_items()
+
+        self.printb()
+        self.printb(
+            "[deep_sky_blue4]Do you want to keep these items? [KEEP/(reg)enerate/(s)kip][/]"
+        )
+
+    def finalize(self):
+        events = [
+            DeleteModule(self.id),
+            AddModule(self.location),
+        ]
+
+        if self.from_previous_id:
+            events += [ConnectLocation(self.from_previous_id, self.location.id)]
+
+        events += (ActivateModule(self.location.id),)
+
+        return events
 
     def extra_json(self, d):
         d["state"] = self.state.value

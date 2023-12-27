@@ -1,0 +1,8 @@
+root   ::= object ws
+
+object ::= "*" ws ( "Add " | "Remove " ) ws string ( nl "*" ws ( "Add" | "Remove" ) ws string )*
+
+string ::= ( [a-zA-Z0-9 ] )*
+
+ws ::= ([ ])*
+nl ::= [\n]

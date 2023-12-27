@@ -22,7 +22,9 @@ This demo has been recorded on an M1 Mac with 32 GB RAM. The demo is in real tim
 
 ## Running
 
-Download an LLM to your local machine. Recommended model is [LLaMA2-13B-Psyfighter2-GGUF](https://huggingface.co/KoboldAI/LLaMA2-13B-Psyfighter2-GGUF), the Q4_K_M variant. Why is it recommended you may ask? Because this is the model I've made the game with 😂
+Download an LLM to your local machine. Recommended model is [Big-Tiger-Gemma-27B-v1-GGUF](https://huggingface.co/TheDrummer/Big-Tiger-Gemma-27B-v1-GGUF), even the Q3_K_M is fine. 
+
+This game was initially made with LLaMA2-13B-Psyfighter2-GGUF, but after GBNF rewrite and some testing, Gemma turned out to be way more capable.
 
 ### Mac M*
 
@@ -48,10 +50,10 @@ If you don't like poetry, you can also install the dependencies manually using `
 
 ```bash
 python3 -m cherryberry \
-	--model ../models/LLaMA2-13B-Psyfighter2.Q4_K_M.gguf \
-	--n_ctx 4096 \
+	--model ../models/Big-Tiger-Gemma-27B-v1c-Q3_K_M.gguf \
+	--n_ctx 8192 \
 	--n_batch 512 \
-	-ngl 1 \
+	-ngl 200 \
 	--threads 4
 ```
 
@@ -81,8 +83,8 @@ If you don't like poetry, you can also install the dependencies manually using `
 
 ```bash
 python3 -m cherryberry \
-	--model ../models/LLaMA2-13B-Psyfighter2.Q4_K_M.gguf \
-	--n_ctx 4096 \
+	--model ../models/Big-Tiger-Gemma-27B-v1c-Q3_K_M.gguf \
+	--n_ctx 8192 \
 	--n_batch 512 \
 	-ngl 200 \
 	--threads 4
@@ -113,3 +115,9 @@ textual console
 # In another
 textual run --dev cherryberry.py --debug --model ...
 ```
+
+## FAQ
+
+**Q: Can this game support [my favourite LLM server] instead of llama.cpp?**
+
+A: I'm afraid not. This game relies heavily on grammar-driven generation using [GBNF](https://github.com/ggerganov/llama.cpp/blob/master/grammars/README.md), and it will fall apart if that's removed. As far as I know there is currently no standard support for grammars in LLM servers.
