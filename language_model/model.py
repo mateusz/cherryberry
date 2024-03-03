@@ -10,6 +10,7 @@ import logging
 
 import ctypes
 
+import ollama
 
 def mute_llama(level, message, user_data):
     pass
@@ -19,6 +20,31 @@ log_callback = ctypes.CFUNCTYPE(None, ctypes.c_int, ctypes.c_char_p, ctypes.c_vo
     mute_llama
 )
 llama_log_set(log_callback, ctypes.c_void_p())
+
+class OllamaClient:
+    def __init__(self, host=None, model=None):
+        self.client = ollama.Client(host=host)
+        self.model = model
+
+    def create_completion(self, prompt=None, max_tokens=None, temperature=None, repeat_penalty=None, top_p=None, top_k=None, stop=None, stream=None):
+        options = {
+                'num_predict': max_tokens,
+                'temperature': temperature,
+                'repeat_penalty': repeat_penalty,
+                'top_p': top_p,
+                'top_k': top_k,
+                'stop': stop
+                }
+        for chunk in self.client.generate(model=self.model, prompt=prompt, stream=stream, options=options):
+            text = chunk['response']
+            text_dict = {
+                    'text': text
+                    }
+            choices_list = [text_dict]
+            choices_dict = {
+                    'choices': choices_list
+                    }
+            yield choices_dict
 
 
 class Model:
@@ -30,15 +56,19 @@ class Model:
         self.debug = args.debug
 
         self.tmpl = Environment(loader=PackageLoader("language_model", "prompts"))
-        self.llm = Llama(
-            model_path=args.model,
-            n_ctx=args.n_ctx,
-            n_batch=args.n_batch,
-            n_gpu_layers=args.gpu_layers,
-            n_threads=args.threads,
-            seed=int(time.time()),
-        )
-        # self.llm.set_cache(LlamaDiskCache('cache'))
+
+        if args.ollama_host is not None and args.ollama_model is not None:
+            self.llm = OllamaClient(host=args.ollama_host, model=args.ollama_model)
+        else:
+            self.llm = Llama(
+                model_path=args.model,
+                n_ctx=args.n_ctx,
+                n_batch=args.n_batch,
+                n_gpu_layers=args.gpu_layers,
+                n_threads=args.threads,
+                seed=int(time.time()),
+            )
+            # self.llm.set_cache(LlamaDiskCache('cache'))
 
     def printb(self, message="", end="\n", flush=False):
         self.queue.put(BufferUpdated(message + end), block=False)
