@@ -153,10 +153,12 @@ if __name__ == "__main__":
     parser.add_argument("-t", "--threads", type=int)
     parser.add_argument("--mlock", action="store_true")
     parser.add_argument("--debug", action="store_true")
+    parser.add_argument("--ollama-host", type=str)
+    parser.add_argument("--ollama-model", type=str)
     args = parser.parse_args()
 
-    if not os.path.isfile(args.model):
-        print("Pass model path as the first parameter")
+    if not (args.model and os.path.isfile(args.model)) and not (args.ollama_host and args.ollama_model):
+        print("Pass model path as the first parameter, or pass ollama-host and ollama-model")
 
     app = Cherryberry(args)
     app.run()

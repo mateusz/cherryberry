@@ -1,0 +1,8 @@
+llama-cpp-python ~= 0.2.25 
+jinja2 >= 3.1.2  
+langchain >= 0.0.340 
+textual >= 0.44.0
+textual-dev >= 1.2.1  
+orjson >= 3.9.10
+argparse
+ollama >= 0.1.7
