@@ -118,16 +118,24 @@ textual run --dev cherryberry.py --debug --model ...
 
 Optionally, you can use an [Ollama](https://ollama.com) API endpoint as the LLM.
 
+First, instal Ollama by following the instructions on the website.
+
+The model "psyfighter" doesn't exist on the Ollama hub, so you will have to create it:
+
+Download the model from [here](https://huggingface.co/KoboldAI/LLaMA2-13B-Psyfighter2-GGUF) (the Q4_K_M variant is recommended).
+
+Copy the provided `LLaMA2-13B-Psyfighter2.modelfile.example` file and remove the suffix.
+
+Edit the `modelfile` to point to the downloaded model file, then run:
+
+```bash
+ollama create psyfighter -f ./LLaMA2-13B-Psyfighter2.modelfile
+```
+
+You should now be able to run the program using ollama:
+
 ```bash
 python3 -m cherryberry \
 	--ollama-host "http://localhost:11434" \
 	--ollama-model "psyfighter"
-```
-
-Note: the model "psyfighter" doesn't exist on the Ollama hub, so you will have to create it.
-1. Download the model from [here](https://huggingface.co/KoboldAI/LLaMA2-13B-Psyfighter2-GGUF) (the Q4_K_M variant is recommended).
-2. Run the following command:
-
-```bash
-ollama create -n psyfighter -f LLaMA2-13B-Psyfighter2.modelfile
 ```

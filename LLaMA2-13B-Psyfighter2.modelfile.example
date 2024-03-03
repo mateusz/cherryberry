@@ -1,0 +1,3 @@
+FROM ~/models/LLaMA2-13B-Psyfighter2.Q4_K_M.gguf
+
+PARAMETER num_ctx 4096
