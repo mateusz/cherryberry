@@ -120,7 +120,7 @@ Optionally, you can use an [Ollama](https://ollama.com) API endpoint as the LLM.
 
 ```bash
 python3 -m cherryberry \
-	--ollama-host "http://localhost:11434 \
+	--ollama-host "http://localhost:11434" \
 	--ollama-model "psyfighter"
 ```
 
