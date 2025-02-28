@@ -1,0 +1,23 @@
+### Instruction:
+
+Describe how the location changed in a text adventure game like Zork, {{setting}}.
+
+Add one sentence to show how it changed because of what happened. Make sure to represent the permanent changes appropriately, but avoid describing temporary changes.
+
+Do not use word "you", do not mention the player, write in the third person perspective and avoid adjectives. Describe the surroundings, but not the events. 
+
+Location earlier: 
+
+```
+{{description}}
+```
+
+What happened:
+
+```
+{{action}} - {{consequences}}
+```
+
+### Response: 
+
+Additional sentence describing the change, keep it short, do NOT repeat what was already mentioned: 

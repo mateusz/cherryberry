@@ -1,4 +1,4 @@
-from llama_cpp import Llama, LlamaCache, LlamaDiskCache, llama_log_set
+from llama_cpp import Llama, LlamaCache, LlamaDiskCache, llama_log_set, LlamaGrammar
 from jinja2 import Environment, PackageLoader
 import orjson
 import re
@@ -49,7 +49,7 @@ class Model:
     def clearg(self):
         self.queue.put(GenerateCleared(), block=False)
 
-    def generate_location(self, setting, history, requirements):
+    def generate_location(self, setting, history, loc_name, loc_description):
         self.printb("[grey46][Generating location...][/]")
 
         htext = ""
@@ -59,13 +59,17 @@ class Model:
                 hist += [f"* {i}"]
             htext = "The story so far, for context only:\n\n" + "\n".join(hist)
 
-        prompt = self.tmpl.get_template("00_generate_location.txt").render(
+        prompt = self.tmpl.get_template("00_generate_location.md").render(
             {
                 "setting": setting,
                 "history": htext,
-                "requirements": requirements,
+                "loc_name": loc_name,
+                "loc_description": loc_description,
             }
         )
+
+        g = LlamaGrammar.from_file("language_model/grammars/general_text.gbnf")
+
         if self.debug:
             logging.debug(prompt)
         stream = self.llm.create_completion(
@@ -77,6 +81,7 @@ class Model:
             top_k=200,
             stop=["\n\n", "#"],
             stream=True,
+            grammar=g,
         )
         out = ""
         for output in stream:
@@ -90,7 +95,7 @@ class Model:
         return out
 
     def generate_location_from_exit(
-        self, setting, history, previous, exit_name, exit_description
+        self, setting, history, previous, loc_name, loc_description
     ):
         self.printb("[grey46][Generating location from exit...][/]")
 
@@ -101,15 +106,18 @@ class Model:
                 hist += [f"* {i}"]
             htext = "The story so far, for context only:\n\n" + "\n".join(hist)
 
-        prompt = self.tmpl.get_template("05_generate_location_from_exit.txt").render(
+        prompt = self.tmpl.get_template("05_generate_location_from_exit.md").render(
             {
                 "setting": setting,
                 "history": htext,
                 "previous": previous,
-                "exit_name": exit_name,
-                "exit_description": exit_description,
+                "loc_name": loc_name,
+                "loc_description": loc_description,
             }
         )
+
+        g = LlamaGrammar.from_file("language_model/grammars/general_text.gbnf")
+
         if self.debug:
             logging.debug(prompt)
         stream = self.llm.create_completion(
@@ -121,6 +129,7 @@ class Model:
             top_k=200,
             stop=["\n\n", "#"],
             stream=True,
+            grammar=g,
         )
         out = ""
         for output in stream:
@@ -144,7 +153,7 @@ class Model:
                 inv += [f"* {i}"]
         inv = "\n".join(inv)
 
-        prompt = self.tmpl.get_template("20_action_items.txt").render(
+        prompt = self.tmpl.get_template("20_action_items.md").render(
             {
                 "description": description,
                 "inventory": inv,
@@ -209,7 +218,7 @@ class Model:
                 inv += [f"* {i}"]
         inv = "\n".join(inv)
 
-        prompt = self.tmpl.get_template("30_consequences.txt").render(
+        prompt = self.tmpl.get_template("30_consequences.md").render(
             {
                 "setting": setting,
                 "history": htext,
@@ -244,7 +253,7 @@ class Model:
     def update_description(self, setting, description, action, consequences):
         self.printb("[grey46][Generating update description...][/]")
 
-        prompt = self.tmpl.get_template("40_update_description.txt").render(
+        prompt = self.tmpl.get_template("40_update_description.md").render(
             {
                 "setting": setting,
                 "description": description,
@@ -261,7 +270,7 @@ class Model:
             repeat_penalty=1.1,
             top_p=0.95,
             top_k=40,
-            stop=["#"],
+            stop=["\n\n", "#"],
             stream=True,
         )
 
@@ -287,7 +296,7 @@ class Model:
                 inv += [f"* {i}"]
         inv = "\n".join(inv)
 
-        prompt = self.tmpl.get_template("50_inventory_updates.txt").render(
+        prompt = self.tmpl.get_template("50_inventory_updates.md").render(
             {
                 "inventory": inv,
                 "description": description,
@@ -297,6 +306,9 @@ class Model:
         )
         if self.debug:
             logging.debug(prompt)
+
+        g = LlamaGrammar.from_file("language_model/grammars/50_inventory_updates.gbnf")
+
         stream = self.llm.create_completion(
             prompt=prompt,
             max_tokens=2048,
@@ -306,8 +318,9 @@ class Model:
             top_k=40,
             stop=["#"],
             stream=True,
+            grammar=g,
         )
-        out = "1. "
+        out = ""
         for output in stream:
             out += output["choices"][0]["text"]
             self.printg(output["choices"][0]["text"], end="", flush=True)
@@ -319,7 +332,7 @@ class Model:
         updates = out
 
         self.printb("[grey46][Generating update inventory][/]")
-        prompt = self.tmpl.get_template("55_update_inventory.txt").render(
+        prompt = self.tmpl.get_template("55_update_inventory.md").render(
             {
                 "inventory": inv,
                 "description": description,
@@ -373,11 +386,13 @@ class Model:
     def find_exits(self, setting, location_description):
         self.printb("[grey46][Generating find exits...][/]")
 
-        prompt = self.tmpl.get_template("10_find_exits.txt").render(
+        prompt = self.tmpl.get_template("10_find_exits.md").render(
             {"setting": setting, "description": location_description}
         )
         if self.debug:
             logging.debug(prompt)
+
+        g = LlamaGrammar.from_file("language_model/grammars/10_find_exits.gbnf")
 
         stream = self.llm.create_completion(
             prompt=prompt,
@@ -386,11 +401,70 @@ class Model:
             repeat_penalty=1.1,
             top_p=0.95,
             top_k=40,
-            stop=["`", "#"],
+            stop=["`", "\n\n"],
             stream=True,
+            grammar=g,
         )
 
-        out = '{\n    "'
+        out = ""
+        self.printg(out, end="")
+        for output in stream:
+            out += output["choices"][0]["text"]
+            self.printg(output["choices"][0]["text"], end="", flush=True)
+        self.printg()
+
+        out = out.strip()
+        if self.debug:
+            logging.debug(out)
+
+        out = re.sub("`.*", "", out, re.M)
+        print(out)
+        try:
+            obj = orjson.loads(out)
+            self.clearg()
+            return obj
+        except:
+            pass
+
+        try:
+            obj = orjson.loads(out + "}")
+            self.clearg()
+            return obj
+        except:
+            pass
+
+        try:
+            obj = orjson.loads(out + "} }")
+            self.clearg()
+            return obj
+        except Exception as exc:
+            self.clearg()
+            raise Exception(f"Unable to parse: {out}") from exc
+
+    def find_items(self, setting, location_description):
+        self.printb("[grey46][Generating find items...][/]")
+
+        prompt = self.tmpl.get_template("15_find_items.md").render(
+            {"setting": setting, "description": location_description}
+        )
+        if self.debug:
+            logging.debug(prompt)
+
+        g = LlamaGrammar.from_file("language_model/grammars/15_find_items.gbnf")
+
+        stream = self.llm.create_completion(
+            prompt=prompt,
+            max_tokens=512,
+            temperature=0.8,
+            repeat_penalty=1.1,
+            top_p=0.95,
+            top_k=40,
+            stop=["`", "\n\n"],
+            stream=True,
+            grammar=g,
+        )
+
+        out = ""
         self.printg(out, end="")
         for output in stream:
             out += output["choices"][0]["text"]
@@ -420,23 +494,12 @@ class Model:
             obj = orjson.loads(out + "} }")
             self.clearg()
             return obj
-        except:
-            pass
-
-        self.printg("[Attempting to fix JSON...]")
-        out = self.json_fixer(out)
-
-        out = re.sub("`.*", "", out, re.M)
-        try:
-            obj = orjson.loads(out)
-            self.clearg()
-            return obj
         except Exception as exc:
             self.clearg()
             raise Exception(f"Unable to parse: {out}") from exc
 
     def json_fixer(self, json_str):
-        prompt = self.tmpl.get_template("99_json_fixer.txt").render(
+        prompt = self.tmpl.get_template("99_json_fixer.md").render(
             {
                 "json": json_str,
             }

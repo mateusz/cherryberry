@@ -81,6 +81,7 @@ class GameInit(Module):
             self.printb(line)
             self.printb()
 
+            self.gstate.setting = self.setting
             lg = LocationGenerator.create_from_user_input(
                 self.gstate, self.queue, self.starting_location
             )
